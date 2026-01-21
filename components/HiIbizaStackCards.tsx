@@ -79,7 +79,9 @@ const Carousel_002 = ({
   autoplay = false,
   spaceBetween = 40,
 }: {
-  images: { src: string; alt: string }[];
+  images: {
+    mobileSrc: string | Blob | undefined; src: string; alt: string 
+}[];
   className?: string;
   showPagination?: boolean;
   showNavigation?: boolean;

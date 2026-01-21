@@ -53,6 +53,7 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ message: "Email envoyé avec succès" });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     console.error(err);
     return NextResponse.json({ error: err.message }, { status: 500 });
