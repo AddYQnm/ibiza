@@ -5,7 +5,7 @@ import ReservationHeroParallax from "@/components/reservation/ReservationHeroPar
 import ReservationTypeSelector from "@/components/reservation/ReservationTypeSelector";
 import ReservationForm from "@/components/reservation/ReservationForm";
 import { Skiper30 } from "@/components/Galerie";
-import ReservationHero, { SpotlightPreview } from "@/components/reservation/SpotlightPreview";
+import ReservationHero from "@/components/reservation/SpotlightPreview";
 
 export default function ReservationPage() {
   const [type, setType] = useState<"table" | "privatisation">("table");

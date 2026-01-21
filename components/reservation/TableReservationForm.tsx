@@ -48,8 +48,9 @@ const handleSubmit = async (e: React.FormEvent) => {
     } else {
       alert("Erreur: " + result.error);
     }
-  } catch (err: any) {
-    alert("Erreur serveur: " + err.message);
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : "Une erreur inconnue s'est produite";
+    alert("Erreur serveur: " + errorMessage);
   }
 };
 
@@ -100,7 +101,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <DatePicker
           selected={form.date}
-          onChange={(date: Date) => setForm({ ...form, date })}
+          onChange={(date: Date | null) => date && setForm({ ...form, date })}
           className={inputClass}
           required
         />

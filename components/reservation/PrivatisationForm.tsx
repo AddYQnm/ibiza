@@ -43,11 +43,15 @@ const handleSubmit = async (e: React.FormEvent) => {
         name: "",
         email: "",
         phone: "",
+        company: "",
         date: new Date(),
-        time: "",
-        guests: 1,
-        type: "privatisation",
-        extras: "",
+        startTime: "",
+        endTime: "",
+        eventType: "anniversaire",
+        location: "Speakeasy",
+        guests: 10,
+        services: "",
+        message: "",
       });
     } else {
       alert("Erreur: " + result.error);
