@@ -2,32 +2,12 @@
 
 import EventHero from "@/components/EventHero";
 import ShotgunLuxurySection from "@/components/ShotgunLuxurySection";
-import { motion } from "framer-motion";
 
-const events = [
-  {
-    date: "VENDREDI 22 MARS",
-    title: "IBIZA NIGHTS",
-    subtitle: "DJ Guest • House • Afro",
-    image: "/images/events/event1.jpg",
-  },
-  {
-    date: "SAMEDI 23 MARS",
-    title: "SPEAKEASY EXPERIENCE",
-    subtitle: "Ambiance intimiste • VIP only",
-    image: "/images/events/event2.jpg",
-  },
-  {
-    date: "VENDREDI 29 MARS",
-    title: "PURPLE WAVE",
-    subtitle: "Deep • Melodic • Progressive",
-    image: "/images/events/event3.jpg",
-  },
-];
+
 
 export default function EventsPage() {
   return (
-    <section className="relative min-h-screen bg-black overflow-hidden">
+    <section className="relative min-h-screen bg-black mt-[-55px] overflow-hidden">
       
 <EventHero />
 <ShotgunLuxurySection />

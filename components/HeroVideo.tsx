@@ -1,7 +1,9 @@
 "use client";
 
-import { motion } from "framer-motion";
+import React from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { Playfair_Display, Montserrat } from "next/font/google";
+import { cn } from "@/lib/utils";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -13,98 +15,225 @@ const montserrat = Montserrat({
   weight: ["400", "600"],
 });
 
+const container = {
+  hidden: {},
+  show: {
+    transition: { staggerChildren: 0.12, delayChildren: 0.15 },
+  },
+};
+
+const item = {
+  hidden: { opacity: 0, y: 22 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.9, ease: "easeOut" as const } },
+};
+
 export default function HeroVideoImmersive() {
+  const reduceMotion = useReducedMotion();
+
   return (
-    <section className="relative z-20 h-screen w-full overflow-hidden bg-black">
+    <section
+      className={cn(
+        "relative isolate z-20 w-full overflow-hidden bg-black",
+        // ✅ Mobile: évite les bugs svh sur iOS + barre d’adresse
+        "min-h-[100vh] h-[100dvh]",
+        "md:h-[100svh]"
+      )}
+    >
       {/* 🎥 VIDEO */}
       <video
         className="absolute inset-0 h-full w-full object-cover"
-        src="/videos/ibiza.mp4"
         autoPlay
         muted
         loop
         playsInline
+        preload="none"
+        poster="/images/mojo_poster.jpg"
+      >
+        <source src="/videos/mojo_video.webm" type="video/webm" />
+        <source src="/videos/mojo_video.mp4" type="video/mp4" />
+      </video>
+
+      {/* 🎞️ OVERLAYS */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/25" />
+      <div className="pointer-events-none absolute inset-0 [mask-image:radial-gradient(60%_55%_at_50%_45%,black,transparent)] bg-black/60" />
+
+      {/* 💜 BLOOMS (mobile: plus petits + moins de blur) */}
+      <div
+        className={cn(
+          "pointer-events-none absolute left-1/2 -translate-x-1/2 rounded-full",
+          // ✅ mobile
+          "-top-44 h-[420px] w-[420px] bg-purple-700/18 blur-[120px]",
+          // ✅ desktop
+          "md:-top-48 md:h-[600px] md:w-[600px] md:bg-purple-700/20 md:blur-[150px]",
+          reduceMotion ? "" : "animate-[heroFloatY_10s_ease-in-out_infinite]"
+        )}
+        style={{ willChange: "transform" }}
       />
 
-      {/* 🌑 CINEMATIC OVERLAY */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30" />
+      <div
+        className={cn(
+          "pointer-events-none absolute rounded-full",
+          // ✅ mobile: on le recentre un peu
+          "top-[32%] left-[8%] h-[320px] w-[320px] bg-fuchsia-600/12 blur-[125px]",
+          // ✅ desktop
+          "md:top-[28%] md:left-[18%] md:h-[440px] md:w-[440px] md:bg-fuchsia-600/14 md:blur-[160px]",
+          reduceMotion ? "" : "animate-[heroFloatXY_11s_ease-in-out_infinite]"
+        )}
+        style={{ willChange: "transform" }}
+      />
 
-      {/* 💜 LIGHT BLOOM */}
-      <div className="absolute -top-40 left-1/2 -translate-x-1/2 h-[700px] w-[700px] rounded-full bg-purple-700/25 blur-[180px]" />
-      <div className="absolute top-1/3 left-1/4 h-[500px] w-[500px] rounded-full bg-fuchsia-600/15 blur-[200px]" />
+      {/* ✨ TOP HIGHLIGHT */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-32 md:h-40 bg-gradient-to-b from-white/10 to-transparent" />
 
       {/* 🎞️ GRAIN */}
-      <div className="pointer-events-none absolute inset-0 bg-[url('/images/grain.png')] opacity-[0.04]" />
+      <div className="pointer-events-none absolute inset-0 bg-[url('/images/grain.png')] opacity-[0.05]" />
 
       {/* CONTENT */}
-      <div className="relative z-10 flex h-full items-center px-6 md:px-24">
-        <div className="max-w-3xl">
-          <motion.span
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className={`${montserrat.className} mb-6 block text-xs uppercase tracking-[0.45em] text-[rgba(245,244,242,0.6)]`}
-          >
-            Rouen · Club & Experience
-          </motion.span>
+      <div className="relative z-10 flex h-full items-center px-5 sm:px-6 md:px-24">
+        <motion.div
+          variants={container}
+          initial="hidden"
+          animate="show"
+          className="w-full max-w-4xl"
+        >
+          {/* Eyebrow */}
+          <motion.div variants={item} className="mb-6 sm:mb-8 flex items-center gap-3 sm:gap-4">
+            <span className="h-[2px] w-10 sm:w-14 bg-gradient-to-r from-purple-300 via-fuchsia-400 to-indigo-300" />
+            <span
+              className={cn(
+                montserrat.className,
+                // ✅ mobile: tracking moins large sinon ça casse
+                "text-[10px] sm:text-xs uppercase tracking-[0.28em] sm:tracking-[0.45em] text-[rgba(245,244,242,0.68)]"
+              )}
+            >
+              Rouen · Club & Experience
+            </span>
+          </motion.div>
 
+          {/* Title */}
           <motion.h1
-            initial={{ opacity: 0, y: 80 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.2, ease: "easeOut" }}
-            className={`${playfair.className} text-[clamp(3.5rem,7vw,6.5rem)] font-black leading-[0.95] text-[#F5F4F2]`}
+            variants={item}
+            className={cn(
+              playfair.className,
+              // ✅ mobile: taille plus raisonnable
+              "text-[clamp(2.8rem,10vw,4.2rem)] sm:text-[clamp(3.4rem,8vw,5.2rem)] md:text-[clamp(3.6rem,7.2vw,7rem)]",
+              "font-black leading-[0.92] text-[#F5F4F2]"
+            )}
           >
             Ibiza
             <br />
             <span className="relative inline-block">
               Club
-              <span className="absolute -inset-4 -z-10 bg-purple-600/20 blur-2xl" />
+              <span className="pointer-events-none absolute -inset-5 md:-inset-6 -z-10 bg-purple-600/18 blur-3xl" />
             </span>
           </motion.h1>
 
+          {/* Subtitle */}
           <motion.p
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 1 }}
-            className={`${montserrat.className} mt-10 max-w-xl text-lg leading-relaxed text-[rgba(245,244,242,0.7)]`}
+            variants={item}
+            className={cn(
+              montserrat.className,
+              // ✅ mobile: texte plus petit + margin réduite
+              "mt-6 sm:mt-8 md:mt-10 max-w-2xl text-base sm:text-lg md:text-xl leading-relaxed text-[rgba(245,244,242,0.74)]"
+            )}
           >
-            <span className="italic">The Night Starts Here.</span>
+            <span className="italic text-[rgba(245,244,242,0.86)]">
+              The Night Starts Here.
+            </span>
             <br />
-            Tables VIP, privatisations exclusives et DJs d’exception.
-            Chaque nuit est pensée comme une expérience sensorielle,
-            intense et élégante.
+            Tables VIP, privatisations exclusives et DJs d’exception — chaque
+            nuit est pensée comme une expérience sensorielle, intense et
+            élégante.
           </motion.p>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.9 }}
-            className="mt-14 flex gap-6"
-          >
+          {/* CTAs */}
+          <motion.div variants={item} className="mt-10 sm:mt-12 md:mt-14 flex flex-col sm:flex-row flex-wrap gap-4 sm:gap-5">
             <a
               href="#reservation"
-              className={`${montserrat.className} rounded-full bg-[#F5F4F2] px-10 py-4 text-sm font-semibold uppercase tracking-widest text-black transition hover:bg-purple-600 hover:text-white`}
+              className={cn(
+                montserrat.className,
+                "group relative inline-flex items-center justify-center",
+                // ✅ mobile: boutons full width
+                "w-full sm:w-auto rounded-full px-8 sm:px-10 py-4",
+                "text-sm font-semibold uppercase tracking-widest",
+                "bg-[#F5F4F2] text-black",
+                "transition-transform duration-300 sm:hover:-translate-y-0.5"
+              )}
             >
-              Réserver
+              <span className="pointer-events-none absolute inset-0 rounded-full opacity-0 blur-xl transition-opacity duration-300 group-hover:opacity-70 bg-purple-500/25" />
+              <span className="relative">Réserver</span>
             </a>
 
             <a
               href="#events"
-              className={`${montserrat.className} rounded-full border border-[rgba(245,244,242,0.3)] px-10 py-4 text-sm uppercase tracking-widest text-[#F5F4F2] hover:border-purple-500 hover:text-purple-400 transition`}
+              className={cn(
+                montserrat.className,
+                "group relative inline-flex items-center justify-center sm:justify-start gap-3",
+                // ✅ mobile: full width et centré
+                "w-full sm:w-auto rounded-full px-3 py-4",
+                "text-sm uppercase tracking-widest text-[#F5F4F2]"
+              )}
             >
               Événements
+              <span className="opacity-70 transition-all duration-500 group-hover:translate-x-2 group-hover:opacity-100">
+                →
+              </span>
+              <span
+                className="
+                  pointer-events-none
+                  absolute left-0 -bottom-1 h-[2px] w-full
+                  origin-left scale-x-0
+                  bg-gradient-to-r from-purple-300 via-fuchsia-400 to-indigo-300
+                  transition-transform duration-500 ease-out
+                  group-hover:scale-x-100
+                "
+              />
             </a>
           </motion.div>
-        </div>
+
+          {/* Micro info badges */}
+          <motion.div
+            variants={item}
+            className="mt-8 sm:mt-10 flex flex-wrap gap-2 sm:gap-3 text-[11px] sm:text-xs"
+          >
+            <span className="rounded-full border border-white/15 bg-white/5 px-3 sm:px-4 py-2 text-white/75 backdrop-blur">
+              VIP Tables
+            </span>
+            <span className="rounded-full border border-white/15 bg-white/5 px-3 sm:px-4 py-2 text-white/75 backdrop-blur">
+              Privatisations
+            </span>
+            <span className="rounded-full border border-white/15 bg-white/5 px-3 sm:px-4 py-2 text-white/75 backdrop-blur">
+              DJs & Events
+            </span>
+          </motion.div>
+        </motion.div>
       </div>
 
-      <motion.div
-        animate={{ y: [0, 12, 0] }}
-        transition={{ repeat: Infinity, duration: 2.5 }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 text-[rgba(245,244,242,0.5)] text-xs tracking-[0.3em]"
-      >
-        SCROLL
-      </motion.div>
+      {/* SCROLL INDICATOR */}
+      {reduceMotion ? (
+        <div
+          className={cn(
+            montserrat.className,
+            "absolute bottom-6 sm:bottom-8 md:bottom-10 left-1/2 -translate-x-1/2",
+            "text-[rgba(245,244,242,0.55)] text-[10px] sm:text-xs tracking-[0.28em] sm:tracking-[0.35em]"
+          )}
+        >
+          SCROLL
+        </div>
+      ) : (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1, y: [0, 10, 0] }}
+          transition={{ opacity: { delay: 1.1 }, y: { repeat: Infinity, duration: 2.4 } }}
+          className={cn(
+            montserrat.className,
+            "absolute bottom-6 sm:bottom-8 md:bottom-10 left-1/2 -translate-x-1/2",
+            "text-[rgba(245,244,242,0.55)] text-[10px] sm:text-xs tracking-[0.28em] sm:tracking-[0.35em]"
+          )}
+        >
+          SCROLL
+        </motion.div>
+      )}
     </section>
   );
 }

@@ -54,10 +54,10 @@ export default function Footer() {
               <li className="hover:text-white transition cursor-pointer">Speakeasy privatisé</li>
               <li className="hover:text-white transition cursor-pointer">Événements privés et corporate</li>
               <li className="flex items-center gap-2 hover:text-white transition cursor-pointer">
-                <FaPhoneAlt className="text-fuchsia-400" /> +33 1 23 45 67 89
+                <FaPhoneAlt className="text-fuchsia-400" /> +33 06 63 32 15 32
               </li>
               <li className="flex items-center gap-2 hover:text-white transition cursor-pointer">
-                <FaEnvelope className="text-fuchsia-400" /> contact@ibizaclub.fr
+                <FaEnvelope className="text-fuchsia-400" /> contact.ibizaclub@gmail.com
               </li>
               <li className="hover:text-white transition cursor-pointer">Dress code & règles du club</li>
             </ul>

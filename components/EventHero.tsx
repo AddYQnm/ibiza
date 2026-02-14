@@ -37,11 +37,13 @@ export default function EventHero() {
             transition={{ duration: 1, ease: "easeOut" }}
             className="text-[clamp(3rem,7vw,7rem)] font-extrabold leading-[0.95] tracking-tight text-white"
           >
-            The Night <br />
-            <span className="relative inline-block">
-              Starts Here
-              <span className="absolute -inset-2 bg-purple-600/20 blur-xl" />
-            </span>
+                  Le meilleur <br />
+          <span className="relative inline-block">
+            des soirées <br /> à Rouen
+            <span className="absolute -inset-2 bg-purple-600/20 blur-xl" />
+          </span>
+
+
           </motion.h1>
 
           {/* TEXT */}

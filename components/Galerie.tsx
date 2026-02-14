@@ -1,10 +1,11 @@
 "use client";
 
-import { motion, MotionValue, useScroll, useTransform } from "framer-motion";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Lenis from "lenis";
-import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
+import { motion, MotionValue, useScroll, useTransform, useReducedMotion } from "framer-motion";
 
-const images = [
+const IMAGES = [
   "/images/photo/A22A6636.jpeg",
   "/images/photo/A22A6709.jpeg",
   "/images/photo/A22A6810.jpeg",
@@ -18,56 +19,75 @@ const images = [
 ];
 
 const Skiper30 = () => {
+  const reduceMotion = useReducedMotion();
   const gallery = useRef<HTMLDivElement>(null);
-  const [dimension, setDimension] = useState({ width: 0, height: 0 });
 
+  const [vh, setVh] = useState<number>(0);
+
+  // ✅ useScroll ok
   const { scrollYProgress } = useScroll({
     target: gallery,
     offset: ["start end", "end start"],
   });
 
-  const { height } = dimension;
-  const y = useTransform(scrollYProgress, [0, 1], [0, height * 2]);
-  const y2 = useTransform(scrollYProgress, [0, 1], [0, height * 3.3]);
-  const y3 = useTransform(scrollYProgress, [0, 1], [0, height * 1.25]);
-  const y4 = useTransform(scrollYProgress, [0, 1], [0, height * 3]);
+  // ✅ évite height=0 au début
+  const height = vh || (typeof window !== "undefined" ? window.innerHeight : 0);
+
+  // ✅ si reduceMotion, on neutralise (moins coûteux)
+  const y = useTransform(scrollYProgress, [0, 1], [0, reduceMotion ? 0 : height * 2]);
+  const y2 = useTransform(scrollYProgress, [0, 1], [0, reduceMotion ? 0 : height * 3.3]);
+  const y3 = useTransform(scrollYProgress, [0, 1], [0, reduceMotion ? 0 : height * 1.25]);
+  const y4 = useTransform(scrollYProgress, [0, 1], [0, reduceMotion ? 0 : height * 3]);
+
+  // ✅ colonnes memo (évite recréation array)
+  const col1 = useMemo(() => [IMAGES[0], IMAGES[1], IMAGES[2]], []);
+  const col2 = useMemo(() => [IMAGES[3], IMAGES[4], IMAGES[5]], []);
+  const col3 = useMemo(() => [IMAGES[6], IMAGES[7], IMAGES[8]], []);
+  const col4 = useMemo(() => [IMAGES[7], IMAGES[8], IMAGES[9]], []); // ✅ évite doublon exact
 
   useEffect(() => {
-    const lenis = new Lenis();
+    // ✅ set vh au montage
+    const update = () => setVh(window.innerHeight);
+    update();
 
+    window.addEventListener("resize", update);
+
+    // ✅ Lenis seulement si on ne réduit pas les animations
+    if (reduceMotion) {
+      return () => window.removeEventListener("resize", update);
+    }
+
+    const lenis = new Lenis({
+      // options utiles
+      smoothWheel: true,
+    });
+
+    let rafId = 0;
     const raf = (time: number) => {
       lenis.raf(time);
-      requestAnimationFrame(raf);
+      rafId = requestAnimationFrame(raf);
     };
 
-    const resize = () => {
-      setDimension({ width: window.innerWidth, height: window.innerHeight });
-    };
-
-    window.addEventListener("resize", resize);
-    requestAnimationFrame(raf);
-    resize();
+    rafId = requestAnimationFrame(raf);
 
     return () => {
-      window.removeEventListener("resize", resize);
+      window.removeEventListener("resize", update);
+      cancelAnimationFrame(rafId);     // ✅ stop RAF
+      lenis.destroy();                 // ✅ cleanup Lenis
     };
-  }, []);
+  }, [reduceMotion]);
 
   return (
-    <main className="w-full  text-black">
-      
-
+    <main className="w-full text-black">
       <div
         ref={gallery}
         className="relative box-border flex h-[175vh] gap-[2vw] overflow-hidden p-[2vw]"
       >
-        <Column images={[images[0], images[1], images[2]]} y={y} />
-        <Column images={[images[3], images[4], images[5]]} y={y2} />
-        <Column images={[images[6], images[7], images[8]]} y={y3} />
-        <Column images={[images[6], images[7], images[8]]} y={y4} />
+        <Column images={col1} y={y} priorityFirst />
+        <Column images={col2} y={y2} />
+        <Column images={col3} y={y3} />
+        <Column images={col4} y={y4} />
       </div>
-    
-  
     </main>
   );
 };
@@ -75,34 +95,42 @@ const Skiper30 = () => {
 type ColumnProps = {
   images: string[];
   y: MotionValue<number>;
+  priorityFirst?: boolean;
 };
 
-const Column = ({ images, y }: ColumnProps) => {
+const Column = ({ images, y, priorityFirst }: ColumnProps) => {
   return (
     <motion.div
       className="
-  relative
-  -top-[45%]
-  flex
-  h-full
-  w-1/4
-  min-w-[320px]
-  flex-col
-  gap-[1vw]
-  first:top-[-45%]
-  [&:nth-child(2)]:top-[-95%]
-  [&:nth-child(3)]:top-[-45%]
-  [&:nth-child(4)]:top-[-75%]
-"
-
-      style={{ y }}
+        relative
+        -top-[45%]
+        flex
+        h-full
+        w-1/4
+        min-w-[320px]
+        flex-col
+        gap-[1vw]
+        first:top-[-45%]
+        [&:nth-child(2)]:top-[-95%]
+        [&:nth-child(3)]:top-[-45%]
+        [&:nth-child(4)]:top-[-75%]
+      "
+      style={{ y, willChange: "transform" }}
     >
       {images.map((src, i) => (
-        <div key={i} className="relative h-full w-full overflow-hidden">
-          <img
-            src={`${src}`}
+        <div
+          key={i}
+          className="relative h-full w-full overflow-hidden rounded"
+        >
+          {/* ✅ next/image: meilleure perf + lazy */}
+          <Image
+            src={src}
             alt="image"
+            fill
             className="pointer-events-none object-cover"
+            sizes="(max-width: 768px) 320px, 25vw"
+            priority={priorityFirst && i === 0} // ✅ une seule priorité
+            loading={priorityFirst && i === 0 ? "eager" : "lazy"}
           />
         </div>
       ))}
@@ -111,21 +139,3 @@ const Column = ({ images, y }: ColumnProps) => {
 };
 
 export { Skiper30 };
-
-/**
- * Skiper 30 Parallax_002 — React + framer motion + lenis
- * Inspired by and adapted from https://www.siena.film/films/my-project-x
- * We respect the original creators. This is an inspired rebuild with our own taste and does not claim any ownership.
- * These animations aren’t associated with the siena.film . They’re independent recreations meant to study interaction design
- *
- * License & Usage:
- * - Free to use and modify in both personal and commercial projects.
- * - Attribution to Skiper UI is required when using the free version.
- * - No attribution required with Skiper UI Pro.
- *
- * Feedback and contributions are welcome.
- *
- * Author: @gurvinder-singh02
- * Website: https://gxuri.in
- * Twitter: https://x.com/Gur__vi
- */

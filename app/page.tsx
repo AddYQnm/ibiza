@@ -1,36 +1,37 @@
-import AboutIbizaSection from "@/components/AboutIbizaSection";
-import EditorialSection from "@/components/EditorialSection";
-import HeroVideo from "@/components/HeroVideo";
-import  { Skiper48 } from "@/components/HiIbizaStackCards";
-import IbizaVideoCard from "@/components/IbizaVideoCard";
-import { InstagramSection } from "@/components/InstagramSection";
-import MusicCarousel from "@/components/MusicCarousel";
-import PixelBlast from "@/components/PixelBlast";
-import { Skiper30 } from "@/components/Galerie";
+'use client';
 
-import { ContainerScroll } from "@/components/ui/container-scroll-animation";
+import dynamic from "next/dynamic";
+
+import HeroVideo from "@/components/HeroVideo";
+import EditorialSection from "@/components/EditorialSection";
+import AboutIbizaSection from "@/components/AboutIbizaSection";
+
+const Skiper48 = dynamic(
+  () => import("@/components/HiIbizaStackCards").then(m => m.Skiper48),
+  { ssr: false, loading: () => <div className="h-40" /> }
+);
+
+const Skiper30 = dynamic(
+  () => import("@/components/Galerie").then(m => m.Skiper30),
+  { ssr: false, loading: () => <div className="h-40" /> }
+);
+
+const InstagramSection = dynamic(
+  () => import("@/components/InstagramSection").then(m => m.InstagramSection),
+  { ssr: false, loading: () => <div className="h-40" /> }
+);
 
 export default function Home() {
   return (
-    <>
     <div className="mt-[-55px]">
-       <HeroVideo />
-    
-    <EditorialSection />
-
-
- 
-<Skiper48 />
-<AboutIbizaSection />
-<main>
-
-      
-      <Skiper30 />
-
-    </main>
-<InstagramSection />
-  </div>
-    </>
-    
+      <HeroVideo />
+      <EditorialSection />
+      <Skiper48 />
+      <AboutIbizaSection />
+      <main>
+        <Skiper30 />
+      </main>
+      <InstagramSection />
+    </div>
   );
 }

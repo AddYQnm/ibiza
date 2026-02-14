@@ -135,7 +135,7 @@ export default function AboutIbizaSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.1 }}
-          className="text-white/85 text-base md:text-lg leading-relaxed"
+          className="text-white/85 text-base md:text-xl leading-relaxed"
         >
           <p className="mb-6">
             <strong className="text-white">
@@ -151,7 +151,39 @@ export default function AboutIbizaSection() {
             font du Speakeasy l’espace idéal pour des soirées privées, des
             moments privilégiés ou une privatisation sur mesure.
           </p>
+          <motion.div
+          className="mt-10"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        >
+          <a
+            href="/speakeazy"
+            className="
+              group relative inline-block
+              text-sm md:text-base font-medium tracking-wide
+              text-white/90
+            "
+          >
+            En savoir plus
+
+            {/* Animated underline */}
+            <span
+              className="
+                pointer-events-none
+                absolute left-0 -bottom-2 h-[2px] w-full
+                origin-left scale-x-0
+                bg-gradient-to-r from-purple-400 via-fuchsia-400 to-indigo-400
+                transition-transform duration-500 ease-out
+                group-hover:scale-x-100
+              "
+            />
+          </a>
         </motion.div>
+
+        </motion.div>
+
 
       </div>
     </section>

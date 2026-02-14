@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
-import { motion } from "framer-motion";
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import React, { useMemo } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectCards, Navigation, Pagination } from "swiper/modules";
 
@@ -12,52 +12,33 @@ import "swiper/css/pagination";
 import "swiper/css/navigation";
 
 import { cn } from "@/lib/utils";
-import { BackgroundGradientAnimation } from "./ui/background-gradient-animation";
-
-/* -------------------------------------------------------------------------- */
-/*                                   MAIN                                     */
-/* -------------------------------------------------------------------------- */
 
 const Skiper48 = () => {
-const images = [
-  { src: "/images/ibiza/b1.png", mobileSrc: "/images/ibiza/post/b1.png", alt: "Ibiza event" },
-  { src: "/images/ibiza/b2.png", mobileSrc: "/images/ibiza/post/b2.png", alt: "Ibiza event" },
-  { src: "/images/ibiza/b3.jpg", mobileSrc: "/images/ibiza/post/b3.jpg", alt: "Ibiza event" },
-    { src: "/images/ibiza/b4.png", mobileSrc: "/images/ibiza/post/b4.png", alt: "Ibiza event" },
-    { src: "/images/ibiza/b5.png", mobileSrc: "/images/ibiza/post/b5.png", alt: "Ibiza event" },
-     { src: "/images/ibiza/b1.png", mobileSrc: "/images/ibiza/post/b1.png", alt: "Ibiza event" },
-  { src: "/images/ibiza/b2.png", mobileSrc: "/images/ibiza/post/b2.png", alt: "Ibiza event" },
-  { src: "/images/ibiza/b3.jpg", mobileSrc: "/images/ibiza/post/b3.jpg", alt: "Ibiza event" },
-    { src: "/images/ibiza/b4.png", mobileSrc: "/images/ibiza/post/b4.png", alt: "Ibiza event" },
-    { src: "/images/ibiza/b5.png", mobileSrc: "/images/ibiza/post/b5.png", alt: "Ibiza event" },
-  ];
+  const reduceMotion = useReducedMotion();
+
+  const images = useMemo(
+    () => [
+      { src: "/images/ibiza/b6.png", mobileSrc: "/images/mobile/6.png", alt: "Ibiza event" },
+      { src: "/images/ibiza/b1.png", mobileSrc: "/images/mobile/1.png", alt: "Ibiza event" },
+      { src: "/images/ibiza/b2.png", mobileSrc: "/images/mobile/2.png", alt: "Ibiza event" },
+      { src: "/images/ibiza/b3.jpg", mobileSrc: "/images/mobile/3.jpg", alt: "Ibiza event" },
+      { src: "/images/ibiza/b4.png", mobileSrc: "/images/mobile/4.png", alt: "Ibiza event" },
+      { src: "/images/ibiza/b5.png", mobileSrc: "/images/mobile/5.png", alt: "Ibiza event" },
+      
+    ],
+    []
+  );
 
   return (
-    <section className="relative w-full min-h-[100svh] overflow-hidden">
-      {/* BACKGROUND
-          - absolute sur mobile (safe)
-          - fixed à partir de md */}
-      <div className="absolute inset-0 z-0 md:fixed">
-        <BackgroundGradientAnimation
-          gradientBackgroundStart="rgb(5, 0, 20)"
-          gradientBackgroundEnd="rgb(20, 0, 40)"
-          firstColor="180, 70, 255"
-          secondColor="255, 60, 180"
-          thirdColor="80, 200, 255"
-          fourthColor="200, 120, 255"
-          fifthColor="255, 80, 200"
-          pointerColor="140, 100, 255"
-          size="120%"
-          blendingValue="hard-light"
-        />
-      </div>
-
-      {/* OVERLAY */}
-      <div className="absolute inset-0 z-[1] bg-black/40 backdrop-blur-[1.5px]" />
-
-      {/* CONTENU */}
+    <section className="relative w-full min-h-[100svh]">
       <div className="relative z-10">
-        <Carousel_002 images={images} loop />
+        <Carousel_002
+          images={images}
+          loop
+          autoplay={!reduceMotion}
+          showPagination={false}
+          showNavigation={false}
+        />
       </div>
     </section>
   );
@@ -68,7 +49,8 @@ export { Skiper48 };
 /* -------------------------------------------------------------------------- */
 /*                                 CAROUSEL                                   */
 /* -------------------------------------------------------------------------- */
-/* ⚠️ LOGIQUE IDENTIQUE — AJUSTEMENTS RESPONSIVE UNIQUEMENT */
+
+type CarouselImage = { src: string; mobileSrc: string; alt: string };
 
 const Carousel_002 = ({
   images,
@@ -79,9 +61,7 @@ const Carousel_002 = ({
   autoplay = false,
   spaceBetween = 40,
 }: {
-  images: {
-    mobileSrc: string | Blob | undefined; src: string; alt: string 
-}[];
+  images: CarouselImage[];
   className?: string;
   showPagination?: boolean;
   showNavigation?: boolean;
@@ -89,23 +69,21 @@ const Carousel_002 = ({
   autoplay?: boolean;
   spaceBetween?: number;
 }) => {
+  const reduceMotion = useReducedMotion();
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={reduceMotion ? false : { opacity: 0, y: 30 }}
+      animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className={cn(
-        // padding mobile réduit
-        "mx-auto max-w-7xl px-4 sm:px-6 py-20 sm:py-32",
-        className
-      )}
+      className={cn("mx-auto max-w-7xl px-4 sm:px-6 py-20 sm:py-32", className)}
     >
       {/* TITRE */}
       <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
+        initial={reduceMotion ? false : { opacity: 0, y: 40 }}
+        whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        viewport={{ once: true }}
+        viewport={{ once: true, margin: "-10% 0px" }}
         className="mb-14 sm:mb-20"
       >
         <div className="flex items-center gap-3 mb-5">
@@ -117,28 +95,25 @@ const Carousel_002 = ({
 
         <h2 className="text-3xl sm:text-4xl md:text-6xl font-bold leading-tight text-white">
           Découvrez nos Soirées <br />
-          <span className="text-purple-300">Incontournable</span>
+          <span className="text-purple-300">Incontournables</span>
         </h2>
       </motion.div>
 
       {/* SWIPER */}
       <Swiper
         spaceBetween={spaceBetween}
-        effect="cards"
-        grabCursor
+        effect={reduceMotion ? undefined : "cards"}
+        grabCursor={!reduceMotion}
         loop={loop}
         autoplay={
-          autoplay
-            ? { delay: 1200, disableOnInteraction: false }
+          autoplay && !reduceMotion
+            ? { delay: 2200, disableOnInteraction: false }
             : false
         }
         pagination={showPagination ? { clickable: true } : false}
         navigation={
           showNavigation
-            ? {
-                nextEl: ".swiper-button-next",
-                prevEl: ".swiper-button-prev",
-              }
+            ? { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" }
             : false
         }
         className="
@@ -154,38 +129,76 @@ const Carousel_002 = ({
         modules={[EffectCards, Autoplay, Pagination, Navigation]}
       >
         {images.map((image, index) => (
-          <SwiperSlide
-  key={index}
-  className="rounded-3xl overflow-hidden shadow-2xl"
->
-  {/* Desktop */}
-  <img
-    src={image.src}
-    alt={image.alt}
-    className="hidden md:block h-full w-full object-cover"
-  />
+          <SwiperSlide key={image.src} className="rounded-3xl overflow-hidden shadow-2xl">
+            {/* Desktop */}
+            <div className="hidden md:block relative h-full w-full">
+              <Image
+                src={image.src}
+                alt={image.alt}
+                fill
+                className="object-cover"
+                sizes="(min-width: 768px) 900px, 0px"
+                priority={index === 0}
+                loading={index === 0 ? "eager" : "lazy"}
+              />
+            </div>
 
-  {/* Mobile / post */}
-  <img
-    src={image.mobileSrc}
-    alt={image.alt}
-    className="block md:hidden h-full w-full object-cover"
-  />
-</SwiperSlide>
-
+            {/* Mobile */}
+            <div className="block md:hidden relative h-full w-full">
+              <Image
+                src={image.mobileSrc}
+                alt={image.alt}
+                fill
+                className="object-cover"
+                sizes="(max-width: 767px) 320px, 0px"
+                priority={index === 0}
+                loading={index === 0 ? "eager" : "lazy"}
+              />
+            </div>
+          </SwiperSlide>
         ))}
-
-        {showNavigation && (
-          <>
-            <div className="swiper-button-next after:hidden">
-              <ChevronRightIcon className="h-6 w-6 text-white" />
-            </div>
-            <div className="swiper-button-prev after:hidden">
-              <ChevronLeftIcon className="h-6 w-6 text-white" />
-            </div>
-          </>
-        )}
       </Swiper>
+
+      {/* 👉 BOUTON EN SAVOIR PLUS (REMIS) */}
+      <motion.div
+        className="mt-14 flex justify-center"
+        initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+        whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-10% 0px" }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
+        <a
+          href="/events"
+          className="
+            group relative inline-flex items-center gap-3
+            text-sm md:text-base font-medium tracking-widest
+            uppercase text-white/90
+          "
+        >
+          En savoir plus
+          <span
+            className="
+              inline-block translate-x-0 opacity-70
+              transition-all duration-500 ease-out
+              group-hover:translate-x-2 group-hover:opacity-100
+            "
+          >
+            →
+          </span>
+
+          {/* underline */}
+          <span
+            className="
+              pointer-events-none
+              absolute left-0 -bottom-2 h-[2px] w-full
+              origin-left scale-x-0
+              bg-gradient-to-r from-purple-400 via-fuchsia-400 to-indigo-400
+              transition-transform duration-500 ease-out
+              group-hover:scale-x-100
+            "
+          />
+        </a>
+      </motion.div>
     </motion.div>
   );
 };

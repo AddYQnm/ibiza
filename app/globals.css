@@ -191,3 +191,44 @@ video {
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes heroFloatY {
+  0%,
+  100% {
+    transform: translate(-50%, 0) scale(1);
+  }
+  50% {
+    transform: translate(-50%, 18px) scale(1.04);
+  }
+}
+
+@keyframes heroFloatXY {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(18px, -12px) scale(1.04);
+  }
+}
+
+/* globals.css */
+@keyframes heroFloatY {
+  0%,
+  100% {
+    transform: translate(-50%, 0) scale(1);
+  }
+  50% {
+    transform: translate(-50%, 18px) scale(1.04);
+  }
+}
+
+@keyframes heroFloatXY {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(18px, -12px) scale(1.04);
+  }
+}

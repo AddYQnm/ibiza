@@ -34,7 +34,8 @@ export function NavbarDemo() {
             variant="primary"
             onClick={() => window.location.href = "/reservation"}
           >
-            Réserver
+            06 63 32 15 32
+
           </NavbarButton>
         </div>
       </NavBody>

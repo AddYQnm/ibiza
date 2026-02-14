@@ -9,7 +9,7 @@ interface ReservationFormProps {
 
 export default function ReservationForm({ type }: ReservationFormProps) {
   return (
-    <div className="w-full max-w-4xl mx-auto">
+    <div className="w-full max-w-4xl mx-auto ">
       {type === "table" ? <TableReservationForm /> : <PrivatisationForm />}
     </div>
   );
