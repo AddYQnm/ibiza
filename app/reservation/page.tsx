@@ -45,10 +45,10 @@ export default function ReservationPage() {
         <ReservationTypeSelector type={type} setType={setType} />
         <ReservationForm type={type} />
 
-        {/* ✅ Bande déroulante 100% visuelle */}
+       {/*  ✅ Bande déroulante 100% visuelle 
         <div className="mt-24">
           <BottlePacksMarquee packs={packs} speedSeconds={20} />
-        </div>
+        </div>*/}
       </section>
 
       <Skiper30 />

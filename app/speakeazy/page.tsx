@@ -14,19 +14,18 @@ export default function SpeakeasyPage() {
   const reduceMotion = useReducedMotion();
 
   return (
-    <main className="overflow-x-hidden">
+    <main className="overflow-x-hidden mt-[-53px]">
       {/* ================= HERO ================= */}
-      <SpeakeasyHero
-        backgroundVideo={{
-          mp4: "/videos/2.mp4",
-          webm: "/videos/2.webm",
-          poster: "/images/speakeazy/hero-poster.png",
-        }}
-        title="Speakeasy"
-        description={`Caché au premier étage de l’Ibiza Club, le Speakeasy
+<SpeakeasyHero
+  backgroundVideo={{
+    mp4: "https://res.cloudinary.com/dba299maa/video/upload/f_auto,q_auto/v1771904303/2_aiffkh.mp4",
+    poster: "/images/speakeazy/hero-poster.png",
+  }}
+  title="Speakeasy"
+  description={`Caché au premier étage de l’Ibiza Club, le Speakeasy
 est un sanctuaire nocturne réservé aux amateurs d’expériences
 confidentielles.`}
-      />
+/>
 
       {/* ================= INTRO / CTA ================= */}
       <section className=" relative py-24 px-6 md:px-24 text-center">
@@ -121,14 +120,14 @@ confidentielles.`}
       </section>
 
       {/* ================= VIDEO SECTION ================= */}
-      <TextVideoSection
-        title="Une atmosphère secrète"
-        description={`Pensé comme un refuge nocturne, le Speakeasy mêle
+   <TextVideoSection
+  title="Une atmosphère secrète"
+  description={`Pensé comme un refuge nocturne, le Speakeasy mêle
 lumières tamisées, matières nobles et musique envoûtante.
 Chaque détail a été conçu pour créer une expérience immersive
 et confidentielle.`}
-        videoSrc="/videos/Speak.mp4"
-      />
+  videoSrc="https://res.cloudinary.com/dba299maa/video/upload/f_auto,q_auto/v1771903983/Speak_sh8fmo.mp4"
+/>
 
       {/* ================= FINAL CTA ================= */}
       <section className="relative py-32 text-center px-6 overflow-hidden">

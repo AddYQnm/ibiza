@@ -40,18 +40,19 @@ export default function HeroVideoImmersive() {
       )}
     >
       {/* 🎥 VIDEO */}
-      <video
-        className="absolute inset-0 h-full w-full object-cover"
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="none"
-        poster="/images/mojo_poster.jpg"
-      >
-        <source src="/videos/mojo_video.webm" type="video/webm" />
-        <source src="/videos/mojo_video.mp4" type="video/mp4" />
-      </video>
+<video
+  className="absolute inset-0 h-full w-full object-cover"
+  autoPlay
+  muted
+  loop
+  playsInline
+  preload="auto"
+>
+  <source
+   src="https://res.cloudinary.com/dba299maa/video/upload/f_auto,q_auto/v1771902683/mojo_video_r1ppim.mp4"
+    type="video/mp4"
+  />
+</video>
 
       {/* 🎞️ OVERLAYS */}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/25" />
