@@ -20,7 +20,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Ibiza Club",
-  description: "Ibiza Club Barcelona",
+  description: "Ibiza Club Rouen",
 };
 
 export default function RootLayout({
