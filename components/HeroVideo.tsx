@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Playfair_Display, Montserrat } from "next/font/google";
 import { cn } from "@/lib/utils";
@@ -20,6 +20,29 @@ const item = {
 
 export default function HeroVideoImmersive() {
   const reduceMotion = useReducedMotion();
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+
+    // iOS: doit être muted AVANT play()
+    v.muted = true;
+
+    const tryPlay = async () => {
+      try {
+        await v.play();
+      } catch {
+        // Autoplay bloqué (Low Power Mode / politique navigateur)
+        // -> la vidéo partira au premier tap utilisateur
+      }
+    };
+
+    tryPlay();
+    v.addEventListener("canplay", tryPlay);
+
+    return () => v.removeEventListener("canplay", tryPlay);
+  }, []);
 
   return (
     <section
@@ -30,15 +53,15 @@ export default function HeroVideoImmersive() {
     >
       {/* 🎥 VIDEO (plus léger) */}
       <video
-  className="absolute inset-0 h-full w-full object-cover"
-  muted
-  autoPlay
-  loop
-  playsInline
-  preload="metadata"
-  disablePictureInPicture
-  webkit-playsinline="true"
->
+        ref={videoRef}
+        className="absolute inset-0 h-full w-full object-cover"
+        muted
+        autoPlay
+        loop
+        playsInline
+        preload="auto"
+        disablePictureInPicture
+      >
         <source
           src="https://res.cloudinary.com/dba299maa/video/upload/f_auto,q_auto/v1771902683/mojo_video_r1ppim.mp4"
           type="video/mp4"
@@ -125,8 +148,7 @@ export default function HeroVideoImmersive() {
           >
             <span className="italic text-[rgba(245,244,242,0.86)]">The Night Starts Here.</span>
             <br />
-            Tables VIP, privatisations exclusives et DJs d’exception — chaque nuit
-            est pensée comme une expérience sensorielle, intense et élégante.
+            Tables VIP, privatisations exclusives et DJs d’exception — chaque nuit est pensée comme une expérience sensorielle, intense et élégante.
           </motion.p>
 
           {/* CTAs */}
@@ -147,7 +169,7 @@ export default function HeroVideoImmersive() {
             </a>
 
             <a
-              href="#events"
+              href="/events"
               className={cn(
                 montserrat.className,
                 "group relative inline-flex items-center justify-center sm:justify-start gap-3",
