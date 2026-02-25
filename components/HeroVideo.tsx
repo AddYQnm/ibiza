@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Playfair_Display, Montserrat } from "next/font/google";
 import { cn } from "@/lib/utils";
@@ -20,6 +20,56 @@ const item = {
 
 export default function HeroVideoImmersive() {
   const reduceMotion = useReducedMotion();
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+
+    // iOS/Safari: on “prépare” le player au maximum
+    v.muted = true;
+    v.playsInline = true;
+
+    // Tentative autoplay immédiate (ok sur desktop + certains Android)
+    const tryPlay = async () => {
+      try {
+        await v.play();
+      } catch {
+        // Safari iOS peut bloquer tant qu’il n’y a pas eu une interaction utilisateur
+      }
+    };
+
+    tryPlay();
+
+    // “Unlock” au 1er geste utilisateur (tap/scroll/click) n’importe où
+    const unlock = () => {
+      tryPlay();
+      cleanup();
+    };
+
+    const cleanup = () => {
+      window.removeEventListener("touchstart", unlock);
+      window.removeEventListener("pointerdown", unlock);
+      window.removeEventListener("click", unlock);
+      window.removeEventListener("scroll", unlock);
+    };
+
+    window.addEventListener("touchstart", unlock, { passive: true });
+    window.addEventListener("pointerdown", unlock, { passive: true });
+    window.addEventListener("click", unlock, { passive: true });
+    window.addEventListener("scroll", unlock, { passive: true });
+
+    // Quand on revient sur l’onglet (iOS peut pause), on retente
+    const onVis = () => {
+      if (document.visibilityState === "visible") tryPlay();
+    };
+    document.addEventListener("visibilitychange", onVis);
+
+    return () => {
+      cleanup();
+      document.removeEventListener("visibilitychange", onVis);
+    };
+  }, []);
 
   return (
     <section
@@ -28,27 +78,30 @@ export default function HeroVideoImmersive() {
         "min-h-[100vh] h-[100dvh] md:h-[100svh]"
       )}
     >
-      {/* 🎥 VIDEO (plus léger) */}
-<video
-  muted
-  autoPlay
-  loop
-  playsInline
-  preload="metadata"
-  disablePictureInPicture
-  webkit-playsinline="true"
->
+      {/* 🎥 VIDEO */}
+      <video
+        ref={videoRef}
+        className="absolute inset-0 h-full w-full object-cover"
+        muted
+        autoPlay
+        loop
+        playsInline
+        preload="auto"
+        disablePictureInPicture
+        // @ts-ignore (Safari legacy)
+        webkit-playsinline="true"
+      >
         <source
           src="https://res.cloudinary.com/dba299maa/video/upload/f_auto,q_auto/v1771902683/mojo_video_r1ppim.mp4"
           type="video/mp4"
         />
       </video>
 
-      {/* OVERLAYS (ok, peu coûteux) */}
+      {/* OVERLAYS */}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/25" />
       <div className="pointer-events-none absolute inset-0 [mask-image:radial-gradient(60%_55%_at_50%_45%,black,transparent)] bg-black/60" />
 
-      {/* 💜 BLOOMS: animés uniquement desktop (gros gain perf) */}
+      {/* 💜 BLOOMS */}
       <div
         className={cn(
           "pointer-events-none absolute left-1/2 -translate-x-1/2 rounded-full transform-gpu",
@@ -72,7 +125,7 @@ export default function HeroVideoImmersive() {
       {/* ✨ TOP HIGHLIGHT */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-32 md:h-40 bg-gradient-to-b from-white/10 to-transparent" />
 
-      {/* 🎞️ GRAIN (si ça lag sur iOS: baisse à 0.03) */}
+      {/* 🎞️ GRAIN */}
       <div className="pointer-events-none absolute inset-0 bg-[url('/images/grain.png')] opacity-[0.05]" />
 
       {/* CONTENT */}
@@ -84,7 +137,6 @@ export default function HeroVideoImmersive() {
           viewport={{ once: true, amount: 0.6 }}
           className="w-full max-w-4xl"
         >
-          {/* Eyebrow */}
           <motion.div variants={item} className="mb-6 sm:mb-8 flex items-center gap-3 sm:gap-4">
             <span className="h-[2px] w-10 sm:w-14 bg-gradient-to-r from-purple-300 via-fuchsia-400 to-indigo-300" />
             <span
@@ -97,7 +149,6 @@ export default function HeroVideoImmersive() {
             </span>
           </motion.div>
 
-          {/* Title */}
           <motion.h1
             variants={item}
             className={cn(
@@ -114,7 +165,6 @@ export default function HeroVideoImmersive() {
             </span>
           </motion.h1>
 
-          {/* Subtitle */}
           <motion.p
             variants={item}
             className={cn(
@@ -124,11 +174,10 @@ export default function HeroVideoImmersive() {
           >
             <span className="italic text-[rgba(245,244,242,0.86)]">The Night Starts Here.</span>
             <br />
-            Tables VIP, privatisations exclusives et DJs d’exception — chaque nuit
-            est pensée comme une expérience sensorielle, intense et élégante.
+            Tables VIP, privatisations exclusives et DJs d’exception — chaque nuit est pensée comme une expérience
+            sensorielle, intense et élégante.
           </motion.p>
 
-          {/* CTAs */}
           <motion.div variants={item} className="mt-10 sm:mt-12 md:mt-14 flex flex-col sm:flex-row flex-wrap gap-4 sm:gap-5">
             <a
               href="/reservation"
@@ -168,7 +217,6 @@ export default function HeroVideoImmersive() {
             </a>
           </motion.div>
 
-          {/* Micro badges */}
           <motion.div variants={item} className="mt-8 sm:mt-10 flex flex-wrap gap-2 sm:gap-3 text-[11px] sm:text-xs">
             <span className="rounded-full border border-white/15 bg-white/5 px-3 sm:px-4 py-2 text-white/75 backdrop-blur">
               VIP Tables
