@@ -25,7 +25,7 @@ export default function Footer() {
               Tables VIP, speakeasy et privatisations pour des soirées inoubliables à Rouen.
             </p>
             <a
-              href="#reservation"
+              href="/reservation"
               className="inline-block rounded-full border border-white/20 bg-white/5 px-6 py-3 text-sm font-semibold text-white uppercase tracking-wide hover:bg-white/10 hover:scale-105 transition"
             >
               Réserve ta table
@@ -45,23 +45,51 @@ export default function Footer() {
           </div>
 
           {/* INFO & CONTACT */}
-          <div>
-            <h3 className="mb-6 text-sm font-semibold tracking-widest text-fuchsia-400 uppercase">
-              Infos & Contact
-            </h3>
-            <ul className="space-y-2 text-sm text-white/70">
-              <li className="hover:text-white transition cursor-pointer">Tables VIP & réservations</li>
-              <li className="hover:text-white transition cursor-pointer">Speakeasy privatisé</li>
-              <li className="hover:text-white transition cursor-pointer">Événements privés et corporate</li>
-              <li className="flex items-center gap-2 hover:text-white transition cursor-pointer">
-                <FaPhoneAlt className="text-fuchsia-400" /> +33 06 63 32 15 32
-              </li>
-              <li className="flex items-center gap-2 hover:text-white transition cursor-pointer">
-                <FaEnvelope className="text-fuchsia-400" /> contact.ibizaclub@gmail.com
-              </li>
-              <li className="hover:text-white transition cursor-pointer">Dress code & règles du club</li>
-            </ul>
-          </div>
+         <div>
+  <h3 className="mb-6 text-sm font-semibold tracking-widest text-fuchsia-400 uppercase">
+    Infos & Contact
+  </h3>
+
+  <ul className="space-y-2 text-sm text-white/70">
+    <li className="hover:text-white transition cursor-pointer">
+      Tables VIP & réservations
+    </li>
+
+    <li className="hover:text-white transition cursor-pointer">
+      Speakeasy privatisé
+    </li>
+
+    <li className="hover:text-white transition cursor-pointer">
+      Événements privés et corporate
+    </li>
+
+    {/* 📞 TELEPHONE */}
+    <li>
+      <a
+        href="tel:+33663321532"
+        className="flex items-center gap-2 hover:text-white transition"
+      >
+        <FaPhoneAlt className="text-fuchsia-400" />
+        +33&nbsp;06&nbsp;63&nbsp;32&nbsp;15&nbsp;32
+      </a>
+    </li>
+
+    {/* ✉️ EMAIL */}
+    <li>
+      <a
+        href="mailto:contact.ibizaclub@gmail.com"
+        className="flex items-center gap-2 hover:text-white transition"
+      >
+        <FaEnvelope className="text-fuchsia-400" />
+        contact.ibizaclub@gmail.com
+      </a>
+    </li>
+
+    <li className="hover:text-white transition cursor-pointer">
+      Dress code & règles du club
+    </li>
+  </ul>
+</div>
 
           {/* LEGAL */}
           <div>

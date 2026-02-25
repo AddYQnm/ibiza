@@ -1,16 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import Lenis from "lenis";
+import React, { useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
-import {
-  motion,
-  MotionValue,
-  useScroll,
-  useTransform,
-  useReducedMotion,
-} from "framer-motion";
 
 const IMAGES = [
   "/images/photo/A22A6636.jpeg",
@@ -25,188 +17,233 @@ const IMAGES = [
   "/images/photo/A22A6909.jpeg",
 ];
 
-/** --------- tiny hooks --------- */
-function useMediaQuery(query: string) {
-  const [matches, setMatches] = useState(false);
+function useMediaQueryRef(query: string) {
+  const ref = useRef(false);
 
   useEffect(() => {
     const m = window.matchMedia(query);
-    const onChange = () => setMatches(m.matches);
-    onChange();
-    m.addEventListener?.("change", onChange);
-    return () => m.removeEventListener?.("change", onChange);
+    const update = () => (ref.current = m.matches);
+    update();
+
+    if (m.addEventListener) m.addEventListener("change", update);
+    else m.addListener(update);
+
+    return () => {
+      if (m.removeEventListener) m.removeEventListener("change", update);
+      else m.removeListener(update);
+    };
   }, [query]);
 
-  return matches;
+  return ref;
 }
 
-function useWindowHeight() {
-  const [vh, setVh] = useState(0);
+function usePrefersReducedMotionRef() {
+  const ref = useRef(false);
 
   useEffect(() => {
-    const update = () => setVh(window.innerHeight);
+    const m = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => (ref.current = m.matches);
     update();
-    window.addEventListener("resize", update, { passive: true });
-    return () => window.removeEventListener("resize", update);
+
+    if (m.addEventListener) m.addEventListener("change", update);
+    else m.addListener(update);
+
+    return () => {
+      if (m.removeEventListener) m.removeEventListener("change", update);
+      else m.removeListener(update);
+    };
   }, []);
 
-  return vh;
+  return ref;
 }
 
-/** --------- Lenis singleton (1 seul RAF global) --------- */
-let lenisSingleton: Lenis | null = null;
-let lenisRafId = 0;
-let lenisUsers = 0;
+/**
+ * SkiperGalleryLite
+ * - Ultra fluide: 1 seule boucle rAF, pas de state, pas de Framer/Lenis
+ * - Animation "parallax columns" + léger easing
+ * - GPU: translate3d + will-change
+ */
+export function SkiperGalleryLite() {
+  const galleryRef = useRef<HTMLDivElement>(null);
+  const colRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const isMobileRef = useMediaQueryRef("(max-width: 768px)");
+  const reduceMotionRef = usePrefersReducedMotionRef();
 
-function ensureLenis() {
-  if (lenisSingleton) return lenisSingleton;
-
-  const lenis = new Lenis({
-    smoothWheel: true,
-    // tu peux ajouter d'autres options si besoin
-  });
-
-  const raf = (time: number) => {
-    lenis.raf(time);
-    lenisRafId = requestAnimationFrame(raf);
-  };
-  lenisRafId = requestAnimationFrame(raf);
-
-  // pause quand onglet caché (gros gain sur mobile)
-  const onVis = () => {
-    if (document.visibilityState === "hidden") lenis.stop();
-    else lenis.start();
-  };
-  document.addEventListener("visibilitychange", onVis);
-
-  lenisSingleton = lenis;
-
-  // cleanup global si plus personne ne l'utilise
-  const cleanup = () => {
-    document.removeEventListener("visibilitychange", onVis);
-    cancelAnimationFrame(lenisRafId);
-    lenis.destroy();
-    lenisSingleton = null;
-  };
-
-  // on stocke le cleanup sur l'instance
-  (lenis as any).__cleanup = cleanup;
-
-  return lenisSingleton;
-}
-
-function releaseLenis() {
-  if (!lenisSingleton) return;
-  // si plus d'utilisateurs, on détruit proprement
-  if (lenisUsers <= 0) {
-    (lenisSingleton as any).__cleanup?.();
-  }
-}
-
-const Skiper30 = () => {
-  const reduceMotion = useReducedMotion();
-  const isMobile = useMediaQuery("(max-width: 768px)");
-  const gallery = useRef<HTMLDivElement>(null);
-
-  const vh = useWindowHeight();
-  const height = vh || (typeof window !== "undefined" ? window.innerHeight : 0);
-
-  const { scrollYProgress } = useScroll({
-    target: gallery,
-    offset: ["start end", "end start"],
-  });
-
-  // Sur mobile: mêmes mouvements mais amplitudes un peu réduites -> moins coûteux
-  const amp = reduceMotion ? 0 : isMobile ? 1.35 : 2;
-  const y = useTransform(scrollYProgress, [0, 1], [0, height * amp]);
-  const y2 = useTransform(scrollYProgress, [0, 1], [0, height * (isMobile ? 2.0 : 3.3)]);
-  const y3 = useTransform(scrollYProgress, [0, 1], [0, height * (isMobile ? 0.9 : 1.25)]);
-  const y4 = useTransform(scrollYProgress, [0, 1], [0, height * (isMobile ? 1.8 : 3)]);
-
-  // colonnes memo
   const col1 = useMemo(() => [IMAGES[0], IMAGES[1], IMAGES[2]], []);
   const col2 = useMemo(() => [IMAGES[3], IMAGES[4], IMAGES[5]], []);
   const col3 = useMemo(() => [IMAGES[6], IMAGES[7], IMAGES[8]], []);
   const col4 = useMemo(() => [IMAGES[7], IMAGES[8], IMAGES[9]], []);
 
   useEffect(() => {
-    if (reduceMotion) return;
+    const gallery = galleryRef.current;
+    if (!gallery) return;
 
-    // Lenis global (évite multiples RAF)
-    lenisUsers += 1;
-    ensureLenis();
+    let rafId = 0;
+    let running = true;
+
+    // easing state (smooth)
+    let currentP = 0;
+    let targetP = 0;
+
+    const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
+    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+
+    const computeTargetProgress = () => {
+      const rect = gallery.getBoundingClientRect();
+      const vh = window.innerHeight || 1;
+
+      // p=0 quand le top du bloc touche le bas du viewport
+      // p=1 quand le bottom du bloc touche le haut du viewport
+      const start = vh;
+      const end = -rect.height;
+      targetP = clamp01((start - rect.top) / (start - end));
+    };
+
+    const tick = () => {
+      rafId = 0;
+      if (!running) return;
+
+      if (reduceMotionRef.current) {
+        // reset propre
+        currentP = 0;
+        for (const el of colRefs.current) {
+          if (el) el.style.transform = "translate3d(0,0,0)";
+        }
+        return;
+      }
+
+      // easing (plus petit = plus smooth)
+      const ease = 0.085;
+      currentP = lerp(currentP, targetP, ease);
+
+      const mobile = isMobileRef.current;
+
+      // offsets init (en % hauteur du conteneur) -> look "stacked columns"
+      const baseTopDesktop = [-0.45, -0.95, -0.45, -0.75];
+      const baseTopMobile = [-0.30, -0.70, -0.30, -0.55];
+
+      // amplitudes par colonne (parallax)
+      const ampsDesktop = [1.7, 2.6, 1.05, 2.4];
+      const ampsMobile = [1.15, 1.75, 0.85, 1.55];
+
+      const rect = gallery.getBoundingClientRect();
+      const h = rect.height || 1;
+
+      const tops = mobile ? baseTopMobile : baseTopDesktop;
+      const amps = mobile ? ampsMobile : ampsDesktop;
+
+      for (let i = 0; i < 4; i++) {
+        const el = colRefs.current[i];
+        if (!el) continue;
+
+        const base = h * tops[i];
+        const move = h * amps[i] * currentP;
+
+        el.style.transform = `translate3d(0, ${base + move}px, 0)`;
+      }
+    };
+
+    const schedule = () => {
+      if (rafId) return;
+      rafId = requestAnimationFrame(tick);
+    };
+
+    const onScroll = () => {
+      computeTargetProgress();
+      schedule();
+    };
+
+    const onResize = () => {
+      computeTargetProgress();
+      schedule();
+    };
+
+    // init
+    computeTargetProgress();
+    schedule();
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onResize, { passive: true });
+
+    // pause quand onglet caché
+    const onVis = () => {
+      running = document.visibilityState !== "hidden";
+      if (running) {
+        computeTargetProgress();
+        schedule();
+      }
+    };
+    document.addEventListener("visibilitychange", onVis);
 
     return () => {
-      lenisUsers -= 1;
-      releaseLenis();
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
+      document.removeEventListener("visibilitychange", onVis);
+      if (rafId) cancelAnimationFrame(rafId);
     };
-  }, [reduceMotion]);
+  }, [isMobileRef, reduceMotionRef]);
 
   return (
     <main className="w-full text-black">
       <div
-        ref={gallery}
+        ref={galleryRef}
         className="
           relative box-border flex h-[175vh] gap-[2vw] overflow-hidden p-[2vw]
           max-md:h-[160vh]
         "
       >
-        <Column images={col1} y={y} priorityFirst />
-        <Column images={col2} y={y2} />
-        <Column images={col3} y={y3} />
-        <Column images={col4} y={y4} />
+        <ColumnLite
+          setRef={(el) => (colRefs.current[0] = el)}
+          images={col1}
+          priorityFirst
+        />
+        <ColumnLite setRef={(el) => (colRefs.current[1] = el)} images={col2} />
+        <ColumnLite setRef={(el) => (colRefs.current[2] = el)} images={col3} />
+        <ColumnLite setRef={(el) => (colRefs.current[3] = el)} images={col4} />
       </div>
     </main>
   );
-};
+}
 
-type ColumnProps = {
+function ColumnLite({
+  images,
+  setRef,
+  priorityFirst,
+}: {
   images: string[];
-  y: MotionValue<number>;
+  setRef: (el: HTMLDivElement | null) => void;
   priorityFirst?: boolean;
-};
-
-const Column = ({ images, y, priorityFirst }: ColumnProps) => {
+}) {
   return (
-    <motion.div
+    <div
+      ref={setRef}
       className="
-        relative -top-[45%] flex h-full flex-col gap-[1vw]
-        w-1/4
-        min-w-[320px]
-        first:top-[-45%]
-        [&:nth-child(2)]:top-[-95%]
-        [&:nth-child(3)]:top-[-45%]
-        [&:nth-child(4)]:top-[-75%]
-
-        /* ✅ Mobile: garde l'esthétique (colonnes), mais évite l'overflow */
-        max-md:w-1/2
-        max-md:min-w-[160px]
-        sm:max-md:min-w-[220px]
+        relative flex h-full flex-col gap-[1vw]
+        w-1/4 min-w-[320px]
+        max-md:w-1/2 max-md:min-w-[160px] sm:max-md:min-w-[220px]
       "
       style={{
-        y,
         willChange: "transform",
-        transform: "translateZ(0)", // petit boost GPU
+        transform: "translate3d(0,0,0)",
+        contain: "layout paint style",
       }}
     >
       {images.map((src, i) => (
-        <div
+        <figure
           key={`${src}-${i}`}
-          className="relative w-full flex-1 overflow-hidden rounded" // ✅ au lieu de h-full (énorme reflow)
+          className="relative w-full flex-1 overflow-hidden rounded"
         >
           <Image
             src={src}
-            alt="image"
+            alt="photo"
             fill
             className="pointer-events-none object-cover"
             sizes="(max-width: 768px) 50vw, 25vw"
             priority={priorityFirst && i === 0}
             loading={priorityFirst && i === 0 ? "eager" : "lazy"}
           />
-        </div>
+        </figure>
       ))}
-    </motion.div>
+    </div>
   );
-};
-
-export { Skiper30 };
+}

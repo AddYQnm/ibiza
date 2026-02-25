@@ -3,7 +3,7 @@
 import { useState } from "react";
 import ReservationTypeSelector from "@/components/reservation/ReservationTypeSelector";
 import ReservationForm from "@/components/reservation/ReservationForm";
-import { Skiper30 } from "@/components/Galerie";
+import { SkiperGalleryLite } from "@/components/Galerie";
 import ReservationHero from "@/components/reservation/SpotlightPreview";
 import BottlePacksMarquee from "@/components/reservation/BottlePacksMarquee";
 
@@ -51,7 +51,7 @@ export default function ReservationPage() {
         </div>*/}
       </section>
 
-      <Skiper30 />
+      <SkiperGalleryLite />
     </div>
   );
 }

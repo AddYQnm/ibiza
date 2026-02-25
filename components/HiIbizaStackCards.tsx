@@ -24,13 +24,13 @@ const Skiper48 = () => {
       { src: "/images/ibiza/b3.jpg", mobileSrc: "/images/mobile/3.jpg", alt: "Ibiza event" },
       { src: "/images/ibiza/b4.png", mobileSrc: "/images/mobile/4.png", alt: "Ibiza event" },
       { src: "/images/ibiza/b5.png", mobileSrc: "/images/mobile/5.png", alt: "Ibiza event" },
-      
     ],
     []
   );
 
   return (
-    <section className="relative w-full min-h-[100svh]">
+    // ✅ IMPORTANT: empêche le scroll horizontal sans changer le rendu
+    <section className="relative w-full min-h-[100svh] overflow-x-clip">
       <div className="relative z-10">
         <Carousel_002
           images={images}
@@ -76,7 +76,7 @@ const Carousel_002 = ({
       initial={reduceMotion ? false : { opacity: 0, y: 30 }}
       animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className={cn("mx-auto max-w-7xl px-4 sm:px-6 py-20 sm:py-32", className)}
+      className={cn("mx-auto max-w-7xl px-4 sm:px-6 py-20 sm:py-32 overflow-x-clip", className)}
     >
       {/* TITRE */}
       <motion.div
@@ -99,67 +99,69 @@ const Carousel_002 = ({
         </h2>
       </motion.div>
 
-      {/* SWIPER */}
-      <Swiper
-        spaceBetween={spaceBetween}
-        effect={reduceMotion ? undefined : "cards"}
-        grabCursor={!reduceMotion}
-        loop={loop}
-        autoplay={
-          autoplay && !reduceMotion
-            ? { delay: 2200, disableOnInteraction: false }
-            : false
-        }
-        pagination={showPagination ? { clickable: true } : false}
-        navigation={
-          showNavigation
-            ? { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" }
-            : false
-        }
-        className="
-          w-full
-          max-w-[320px]
-          sm:max-w-[500px]
-          md:max-w-[900px]
-          h-[360px]
-          sm:h-[500px]
-          md:h-[600px]
-          mx-auto
-        "
-        modules={[EffectCards, Autoplay, Pagination, Navigation]}
-      >
-        {images.map((image, index) => (
-          <SwiperSlide key={image.src} className="rounded-3xl overflow-hidden shadow-2xl">
-            {/* Desktop */}
-            <div className="hidden md:block relative h-full w-full">
-              <Image
-                src={image.src}
-                alt={image.alt}
-                fill
-                className="object-cover"
-                sizes="(min-width: 768px) 900px, 0px"
-                priority={index === 0}
-                loading={index === 0 ? "eager" : "lazy"}
-              />
-            </div>
+      {/* ✅ WRAPPER CLIP : garde ton rendu mais coupe le débordement Swiper */}
+      <div className="w-full overflow-x-clip">
+        <Swiper
+          spaceBetween={spaceBetween}
+          effect={reduceMotion ? "slide" : "cards"} // ✅ jamais undefined
+          grabCursor={!reduceMotion}
+          loop={loop}
+          autoplay={
+            autoplay && !reduceMotion
+              ? { delay: 2200, disableOnInteraction: false }
+              : false
+          }
+          pagination={showPagination ? { clickable: true } : false}
+          navigation={
+            showNavigation
+              ? { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" }
+              : false
+          }
+          className="
+            w-full
+            max-w-[320px]
+            sm:max-w-[500px]
+            md:max-w-[900px]
+            h-[360px]
+            sm:h-[500px]
+            md:h-[600px]
+            mx-auto
+          "
+          modules={[EffectCards, Autoplay, Pagination, Navigation]}
+        >
+          {images.map((image, index) => (
+            <SwiperSlide key={image.src} className="rounded-3xl overflow-hidden shadow-2xl">
+              {/* Desktop */}
+              <div className="hidden md:block relative h-full w-full">
+                <Image
+                  src={image.src}
+                  alt={image.alt}
+                  fill
+                  className="object-cover"
+                  sizes="(min-width: 768px) 900px, 0px"
+                  priority={index === 0}
+                  loading={index === 0 ? "eager" : "lazy"}
+                />
+              </div>
 
-            {/* Mobile */}
-            <div className="block md:hidden relative h-full w-full">
-              <Image
-                src={image.mobileSrc}
-                alt={image.alt}
-                fill
-                className="object-cover"
-                sizes="(max-width: 767px) 320px, 0px"
-                priority={index === 0}
-                loading={index === 0 ? "eager" : "lazy"}
-              />
-            </div>
-          </SwiperSlide>
-        ))}
-      </Swiper>
+              {/* Mobile */}
+              <div className="block md:hidden relative h-full w-full">
+                <Image
+                  src={image.mobileSrc}
+                  alt={image.alt}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 767px) 320px, 0px"
+                  priority={index === 0}
+                  loading={index === 0 ? "eager" : "lazy"}
+                />
+              </div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
+      </div>
 
-      {/* 👉 BOUTON EN SAVOIR PLUS (REMIS) */}
+      {/* BOUTON */}
       <motion.div
         className="mt-14 flex justify-center"
         initial={reduceMotion ? false : { opacity: 0, y: 20 }}
@@ -186,7 +188,6 @@ const Carousel_002 = ({
             →
           </span>
 
-          {/* underline */}
           <span
             className="
               pointer-events-none

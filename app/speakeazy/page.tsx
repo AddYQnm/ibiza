@@ -1,34 +1,31 @@
-
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
 import TextVideoSection from "@/components/TextVideoSection";
 import Image from "next/image";
 import SpeakeasyHero from "@/components/SpeakeasyHero";
-import { Playfair_Display, Montserrat } from "next/font/google";
 
-const playfair = Playfair_Display({ subsets: ["latin"], weight: ["700", "900"] });
-const montserrat = Montserrat({ subsets: ["latin"], weight: ["400", "600"] });
-
-export default function SpeakeasyPage() {
+export default function SpeakeasyPageClient() {
+  const playfairClass = "playfair"; // Replace with your actual Playfair font class
+  const montserratClass = "montserrat"; // Replace with your actual Montserrat font class
   const reduceMotion = useReducedMotion();
 
   return (
-    <main className="overflow-x-hidden mt-[-53px]">
+    <main className="overflow-x-hidden -mt-[53px]">
       {/* ================= HERO ================= */}
-<SpeakeasyHero
-  backgroundVideo={{
-    mp4: "https://res.cloudinary.com/dba299maa/video/upload/f_auto,q_auto/v1771904303/2_aiffkh.mp4",
-    poster: "/images/speakeazy/hero-poster.png",
-  }}
-  title="Speakeasy"
-  description={`Caché au premier étage de l’Ibiza Club, le Speakeasy
+      <SpeakeasyHero
+        backgroundVideo={{
+          mp4: "https://res.cloudinary.com/dba299maa/video/upload/f_auto,q_auto/v1771904303/2_aiffkh.mp4",
+          poster: "/images/speakeazy/hero-poster.png",
+        }}
+        title="Speakeasy"
+        description={`Caché au premier étage de l’Ibiza Club, le Speakeasy
 est un sanctuaire nocturne réservé aux amateurs d’expériences
 confidentielles.`}
-/>
+      />
 
       {/* ================= INTRO / CTA ================= */}
-      <section className=" relative py-24 px-6 md:px-24 text-center">
+      <section className="relative py-24 px-6 md:px-24 text-center">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-10 left-1/2 -translate-x-1/2 h-[320px] w-[320px] rounded-full bg-[#5B2EFF]/20 blur-[160px]" />
           <div className="absolute bottom-0 right-1/3 h-[280px] w-[280px] rounded-full bg-[#E05BAA]/15 blur-[160px]" />
@@ -39,7 +36,7 @@ confidentielles.`}
           whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.9 }}
-          className={`${playfair.className} text-4xl md:text-5xl mb-6`}
+          className={`${playfairClass} text-4xl md:text-5xl mb-6`}
         >
           Une nuit magnétique
         </motion.h2>
@@ -49,7 +46,7 @@ confidentielles.`}
           whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.9, delay: 0.1 }}
-          className={`${montserrat.className} max-w-2xl mx-auto text-white/70 text-lg leading-relaxed`}
+          className={`${montserratClass} max-w-2xl mx-auto text-white/70 text-lg leading-relaxed`}
         >
           Le Speakeasy révèle une autre facette de la nuit : plus intime, plus
           sensuelle, résolument exclusive.
@@ -64,7 +61,7 @@ confidentielles.`}
         >
           <a
             href="/reservation"
-            className={`${montserrat.className}
+            className={`${montserratClass}
               inline-flex items-center justify-center
               px-12 py-4 rounded-full
               bg-gradient-to-r from-[#5B2EFF] to-[#E05BAA]
@@ -84,10 +81,7 @@ confidentielles.`}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          variants={{
-            hidden: {},
-            visible: { transition: { staggerChildren: 0.15 } },
-          }}
+          variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.15 } } }}
           className="grid grid-cols-1 md:grid-cols-3 gap-6"
         >
           {[
@@ -101,7 +95,7 @@ confidentielles.`}
                 hidden: { opacity: 0, y: 40 },
                 visible: { opacity: 1, y: 0 },
               }}
-              className="relative h-[440px] overflow-hidden rounded-3xl group"
+              className="relative h-[360px] sm:h-[420px] md:h-[440px] overflow-hidden rounded-3xl group"
             >
               <Image
                 src={src}
@@ -120,14 +114,14 @@ confidentielles.`}
       </section>
 
       {/* ================= VIDEO SECTION ================= */}
-   <TextVideoSection
-  title="Une atmosphère secrète"
-  description={`Pensé comme un refuge nocturne, le Speakeasy mêle
+      <TextVideoSection
+        title="Une atmosphère secrète"
+        description={`Pensé comme un refuge nocturne, le Speakeasy mêle
 lumières tamisées, matières nobles et musique envoûtante.
 Chaque détail a été conçu pour créer une expérience immersive
 et confidentielle.`}
-  videoSrc="https://res.cloudinary.com/dba299maa/video/upload/f_auto,q_auto/v1771903983/Speak_sh8fmo.mp4"
-/>
+        videoSrc="https://res.cloudinary.com/dba299maa/video/upload/f_auto,q_auto/v1771903983/Speak_sh8fmo.mp4"
+      />
 
       {/* ================= FINAL CTA ================= */}
       <section className="relative py-32 text-center px-6 overflow-hidden">
@@ -142,7 +136,7 @@ et confidentielle.`}
             whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.9 }}
-            className={`${playfair.className} text-3xl md:text-4xl mb-8`}
+            className={`${playfairClass} text-3xl md:text-4xl mb-8`}
           >
             Accès sur réservation uniquement
           </motion.h3>
@@ -155,7 +149,7 @@ et confidentielle.`}
             transition={{ duration: 0.9, delay: 0.1 }}
             whileHover={reduceMotion ? undefined : { scale: 1.06 }}
             whileTap={reduceMotion ? undefined : { scale: 0.98 }}
-            className={`${montserrat.className}
+            className={`${montserratClass}
               inline-flex items-center justify-center
               px-14 py-5 rounded-full
               bg-gradient-to-r from-[#5B2EFF] to-[#E05BAA]
@@ -171,4 +165,4 @@ et confidentielle.`}
       </section>
     </main>
   );
-}  
+}
