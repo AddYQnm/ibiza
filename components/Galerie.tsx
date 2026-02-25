@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 
 const IMAGES = [
@@ -58,10 +58,9 @@ function usePrefersReducedMotionRef() {
 }
 
 /**
- * SkiperGalleryLite
- * - Ultra fluide: 1 seule boucle rAF, pas de state, pas de Framer/Lenis
- * - Animation "parallax columns" + léger easing
- * - GPU: translate3d + will-change
+ * SkiperGalleryLite (optimisée)
+ * - Mobile: render progressif des images (évite 12 images d’un coup)
+ * - Desktop: full render ok
  */
 export function SkiperGalleryLite() {
   const galleryRef = useRef<HTMLDivElement>(null);
@@ -69,11 +68,59 @@ export function SkiperGalleryLite() {
   const isMobileRef = useMediaQueryRef("(max-width: 768px)");
   const reduceMotionRef = usePrefersReducedMotionRef();
 
+  // Colonnes
   const col1 = useMemo(() => [IMAGES[0], IMAGES[1], IMAGES[2]], []);
   const col2 = useMemo(() => [IMAGES[3], IMAGES[4], IMAGES[5]], []);
   const col3 = useMemo(() => [IMAGES[6], IMAGES[7], IMAGES[8]], []);
   const col4 = useMemo(() => [IMAGES[7], IMAGES[8], IMAGES[9]], []);
 
+  // ✅ rendu progressif : combien d’images par colonne on affiche
+  const [visibleCount, setVisibleCount] = useState(() => {
+    // SSR safe: on commence “light”, puis on upgrade côté client
+    return 2;
+  });
+
+  // ✅ quand la section entre dans le viewport, on charge le reste en idle
+  useEffect(() => {
+    const gallery = galleryRef.current;
+    if (!gallery) return;
+
+    const isMobileNow = () => isMobileRef.current;
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        const e = entries[0];
+        if (!e?.isIntersecting) return;
+
+        // Desktop: on peut afficher tout de suite
+        if (!isMobileNow()) {
+          setVisibleCount(3);
+          io.disconnect();
+          return;
+        }
+
+        // Mobile: d’abord 2 images/colonne, puis 3 après un moment “idle”
+        setVisibleCount(2);
+
+        const schedule = () => setVisibleCount(3);
+
+        // requestIdleCallback si dispo, sinon timeout
+        if ("requestIdleCallback" in window) {
+          (window as any).requestIdleCallback(schedule, { timeout: 1200 });
+        } else {
+          setTimeout(schedule, 500);
+        }
+
+        io.disconnect();
+      },
+      { root: null, threshold: 0.15 }
+    );
+
+    io.observe(gallery);
+    return () => io.disconnect();
+  }, [isMobileRef]);
+
+  // rAF parallax (inchangé, mais un poil optimisé)
   useEffect(() => {
     const gallery = galleryRef.current;
     if (!gallery) return;
@@ -81,7 +128,6 @@ export function SkiperGalleryLite() {
     let rafId = 0;
     let running = true;
 
-    // easing state (smooth)
     let currentP = 0;
     let targetP = 0;
 
@@ -91,9 +137,6 @@ export function SkiperGalleryLite() {
     const computeTargetProgress = () => {
       const rect = gallery.getBoundingClientRect();
       const vh = window.innerHeight || 1;
-
-      // p=0 quand le top du bloc touche le bas du viewport
-      // p=1 quand le bottom du bloc touche le haut du viewport
       const start = vh;
       const end = -rect.height;
       targetP = clamp01((start - rect.top) / (start - end));
@@ -104,7 +147,6 @@ export function SkiperGalleryLite() {
       if (!running) return;
 
       if (reduceMotionRef.current) {
-        // reset propre
         currentP = 0;
         for (const el of colRefs.current) {
           if (el) el.style.transform = "translate3d(0,0,0)";
@@ -112,17 +154,13 @@ export function SkiperGalleryLite() {
         return;
       }
 
-      // easing (plus petit = plus smooth)
-      const ease = 0.085;
-      currentP = lerp(currentP, targetP, ease);
+      currentP = lerp(currentP, targetP, 0.085);
 
       const mobile = isMobileRef.current;
 
-      // offsets init (en % hauteur du conteneur) -> look "stacked columns"
       const baseTopDesktop = [-0.45, -0.95, -0.45, -0.75];
       const baseTopMobile = [-0.30, -0.70, -0.30, -0.55];
 
-      // amplitudes par colonne (parallax)
       const ampsDesktop = [1.7, 2.6, 1.05, 2.4];
       const ampsMobile = [1.15, 1.75, 0.85, 1.55];
 
@@ -152,20 +190,17 @@ export function SkiperGalleryLite() {
       computeTargetProgress();
       schedule();
     };
-
     const onResize = () => {
       computeTargetProgress();
       schedule();
     };
 
-    // init
     computeTargetProgress();
     schedule();
 
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onResize, { passive: true });
 
-    // pause quand onglet caché
     const onVis = () => {
       running = document.visibilityState !== "hidden";
       if (running) {
@@ -195,11 +230,24 @@ export function SkiperGalleryLite() {
         <ColumnLite
           setRef={(el) => (colRefs.current[0] = el)}
           images={col1}
+          visibleCount={visibleCount}
           priorityFirst
         />
-        <ColumnLite setRef={(el) => (colRefs.current[1] = el)} images={col2} />
-        <ColumnLite setRef={(el) => (colRefs.current[2] = el)} images={col3} />
-        <ColumnLite setRef={(el) => (colRefs.current[3] = el)} images={col4} />
+        <ColumnLite
+          setRef={(el) => (colRefs.current[1] = el)}
+          images={col2}
+          visibleCount={visibleCount}
+        />
+        <ColumnLite
+          setRef={(el) => (colRefs.current[2] = el)}
+          images={col3}
+          visibleCount={visibleCount}
+        />
+        <ColumnLite
+          setRef={(el) => (colRefs.current[3] = el)}
+          images={col4}
+          visibleCount={visibleCount}
+        />
       </div>
     </main>
   );
@@ -209,11 +257,16 @@ function ColumnLite({
   images,
   setRef,
   priorityFirst,
+  visibleCount,
 }: {
   images: string[];
   setRef: (el: HTMLDivElement | null) => void;
   priorityFirst?: boolean;
+  visibleCount: number; // ✅ combien d’images rendre
 }) {
+  // ✅ ne rend que visibleCount images (mobile: 2 puis 3)
+  const toRender = images.slice(0, visibleCount);
+
   return (
     <div
       ref={setRef}
@@ -228,22 +281,34 @@ function ColumnLite({
         contain: "layout paint style",
       }}
     >
-      {images.map((src, i) => (
-        <figure
-          key={`${src}-${i}`}
-          className="relative w-full flex-1 overflow-hidden rounded"
-        >
+      {toRender.map((src, i) => (
+        <figure key={`${src}-${i}`} className="relative w-full flex-1 overflow-hidden rounded">
           <Image
             src={src}
             alt="photo"
             fill
             className="pointer-events-none object-cover"
             sizes="(max-width: 768px) 50vw, 25vw"
+            // ✅ charge juste la première image en priorité
             priority={priorityFirst && i === 0}
             loading={priorityFirst && i === 0 ? "eager" : "lazy"}
+            // ✅ très bon pour fluidité
+            decoding="async"
+            // ✅ baisse un peu la qualité (gros gain mobile)
+            quality={75}
           />
         </figure>
       ))}
+
+      {/* ✅ placeholders pour garder les hauteurs/flow identiques quand on ajoute les images */}
+      {images.length > toRender.length &&
+        Array.from({ length: images.length - toRender.length }).map((_, idx) => (
+          <div
+            key={`ph-${idx}`}
+            className="relative w-full flex-1 rounded bg-white/5"
+            aria-hidden="true"
+          />
+        ))}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Playfair_Display, Montserrat } from "next/font/google";
 import { cn } from "@/lib/utils";
@@ -15,7 +15,7 @@ type SpeakeasyHeroProps = {
     webm?: string;
     poster?: string;
   };
-  backgroundImage?: string; // fallback si pas de vidéo
+  backgroundImage?: string;
   subtitle?: string;
   title: string;
   description: string;
@@ -29,97 +29,106 @@ export default function SpeakeasyHero({
   description,
 }: SpeakeasyHeroProps) {
   const reduceMotion = useReducedMotion();
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
-  // ✅ optionnel mais recommandé: coupe la vidéo sur mobile (iOS/Safari)
-  const [isMobile, setIsMobile] = React.useState(false);
-  React.useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
-    check();
-    window.addEventListener("resize", check, { passive: true } as any);
-    return () => window.removeEventListener("resize", check as any);
+  /* ✅ Force play sur mobile (iOS/Safari safe) */
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.muted = true;
+    video.setAttribute("playsinline", "");
+    video.setAttribute("webkit-playsinline", "");
+
+    const p = video.play();
+    if (p && typeof p.catch === "function") {
+      p.catch(() => {
+        // Autoplay peut être bloqué → poster visible, play au premier scroll/tap
+      });
+    }
   }, []);
-
-  const showVideo = Boolean(backgroundVideo) && !reduceMotion && !isMobile;
 
   return (
     <section
       className={cn(
         "relative isolate z-20 w-full overflow-hidden bg-black flex items-center",
-        "min-h-[100vh] h-[100dvh]",
-        "md:h-screen"
+        "min-h-[100vh] h-[100dvh] md:h-screen"
       )}
     >
-      {/* 🎥 VIDEO (comme ton HeroVideoImmersive) */}
-      {showVideo ? (
+      {/* 🎥 VIDEO (desktop + mobile) */}
+      {backgroundVideo ? (
         <video
+          ref={videoRef}
           className="absolute inset-0 h-full w-full object-cover"
           autoPlay
           muted
           loop
           playsInline
-          // ⚠️ ton exemple a preload="none" (ok), mais "metadata" est souvent plus smooth
           preload="metadata"
-          poster={backgroundVideo?.poster}
+          poster={backgroundVideo.poster}
+          disablePictureInPicture
+          webkit-playsinline="true"
         >
-          {backgroundVideo?.webm ? (
+          {backgroundVideo.webm && (
             <source src={backgroundVideo.webm} type="video/webm" />
-          ) : null}
-          <source src={backgroundVideo!.mp4} type="video/mp4" />
+          )}
+          <source src={backgroundVideo.mp4} type="video/mp4" />
         </video>
       ) : (
-        // ✅ fallback image (poster > backgroundImage)
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage: `url(${backgroundVideo?.poster || backgroundImage || ""})`,
+            backgroundImage: `url(${backgroundImage || ""})`,
           }}
         />
       )}
 
-      {/* 🎞️ OVERLAYS (tu peux garder le même style que ton exemple) */}
+      {/* 🎞️ OVERLAY */}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/25" />
 
-      {/* ✅ BLOOMS (option: si tu veux les mêmes, garde-les; sinon je peux les rendre plus light) */}
+      {/* 🌈 BLOOMS (mobile allégés) */}
       <div
-        className={cn(
-          "pointer-events-none absolute -top-40 left-1/3 h-[600px] w-[600px] rounded-full bg-purple-800/20 blur-[160px]",
-          "transform-gpu"
-        )}
-        style={{ willChange: "transform" }}
+        className="
+          pointer-events-none absolute -top-32 left-1/3
+          h-[420px] w-[420px] md:h-[600px] md:w-[600px]
+          bg-purple-800/16 md:bg-purple-800/20
+          blur-[110px] md:blur-[160px]
+        "
       />
       <div
-        className={cn(
-          "pointer-events-none absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-fuchsia-700/15 blur-[160px]",
-          "transform-gpu"
-        )}
-        style={{ willChange: "transform" }}
+        className="
+          pointer-events-none absolute bottom-0 right-1/4
+          h-[360px] w-[360px] md:h-[500px] md:w-[500px]
+          bg-fuchsia-700/12 md:bg-fuchsia-700/15
+          blur-[110px] md:blur-[160px]
+        "
       />
 
-      {/* CONTENT (tes infos) */}
+      {/* CONTENT */}
       <div className="relative z-10 px-6 md:px-24 max-w-5xl">
         <motion.span
-          initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+          initial={reduceMotion ? false : { opacity: 0, y: 12 }}
           animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-          transition={{ duration: 1 }}
+          transition={{ duration: 0.6 }}
           className={`${montserrat.className} block text-xs uppercase tracking-[0.45em] text-white/60 mb-6`}
         >
           {subtitle}
         </motion.span>
 
         <motion.h1
-          initial={reduceMotion ? false : { opacity: 0, y: 50 }}
+          initial={reduceMotion ? false : { opacity: 0, y: 24 }}
           animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-          transition={{ duration: 1.2, ease: "easeOut" }}
-          className={`${playfair.className} text-[clamp(3.5rem,7vw,6.5rem)] leading-[0.95] text-[#F5F4F2]`}
+          transition={{ duration: 0.7, ease: "easeOut" }}
+          className={`${playfair.className} text-[clamp(3rem,8vw,6.5rem)] leading-[0.95] text-[#F5F4F2]`}
         >
           {title}
         </motion.h1>
 
         <motion.p
-          initial={reduceMotion ? false : { opacity: 0, y: 40 }}
+          initial={reduceMotion ? false : { opacity: 0, y: 16 }}
           animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-          transition={{ duration: 1.4, ease: "easeOut" }}
-          className={`${montserrat.className} mt-10 max-w-xl text-lg text-white/70 leading-relaxed`}
+          transition={{ duration: 0.7, ease: "easeOut", delay: 0.1 }}
+          className={`${montserrat.className} mt-8 max-w-xl text-base sm:text-lg text-white/70 leading-relaxed`}
         >
           {description}
         </motion.p>
