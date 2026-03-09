@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-html-link-for-pages */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { cn } from "@/lib/utils";
@@ -261,7 +262,7 @@ export const MobileNavToggle = ({
 export const NavbarLogo = ({ visible }: { visible?: boolean }) => {
   return (
     <a
-      href="#"
+      href="/"
       className={cn(
         "relative z-20 mr-4 flex items-center space-x-2 px-2 py-1 text-sm font-normal",
         // ✅ Inactive: blanc

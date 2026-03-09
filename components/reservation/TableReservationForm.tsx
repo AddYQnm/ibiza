@@ -11,22 +11,25 @@ type Notice = {
   message?: string;
 };
 
-export default function TableReservationForm() {
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    date: new Date(),
-    time: "",
-    guests: 1,
-    tableType: "table",
-    extras: "",
-  });
+type FormErrors = Partial<Record<keyof typeof initialForm, string>>;
 
+const initialForm = {
+  name: "",
+  email: "",
+  phone: "",
+  date: new Date(),
+  time: "",
+  guests: 1,
+  tableType: "table",
+  extras: "",
+};
+
+export default function TableReservationForm() {
+  const [form, setForm] = useState(initialForm);
+  const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notice, setNotice] = useState<Notice | null>(null);
 
-  // auto-hide (optionnel)
   useEffect(() => {
     if (!notice) return;
     const id = window.setTimeout(() => setNotice(null), 6000);
@@ -39,17 +42,53 @@ export default function TableReservationForm() {
     >
   ) => {
     const { name, value } = e.target;
+
     setForm((prev) => ({
       ...prev,
       [name]: name === "guests" ? Number(value) : value,
     }));
+
+    if (errors[name as keyof typeof initialForm]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: "",
+      }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors: FormErrors = {};
+
+    if (!form.name.trim()) newErrors.name = "Le nom et prénom est requis.";
+    if (!form.email.trim()) newErrors.email = "L’email est requis.";
+    if (!form.phone.trim()) newErrors.phone = "Le téléphone est requis.";
+    if (!form.time.trim()) newErrors.time = "L’heure d’arrivée est requise.";
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const isValid = validateForm();
+
+    if (!isValid) {
+      setNotice({
+        type: "error",
+        title: "Informations manquantes",
+        message: "Veuillez remplir tous les champs obligatoires marqués d’un *.",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
-    setNotice({ type: "info", title: "Envoi en cours…", message: "Merci de patienter." });
+    setNotice({
+      type: "info",
+      title: "Envoi en cours…",
+      message: "Merci de patienter.",
+    });
 
     try {
       const response = await fetch("/api/reservation", {
@@ -81,16 +120,8 @@ export default function TableReservationForm() {
         message: "Nous revenons vers vous très rapidement pour confirmation.",
       });
 
-      setForm({
-        name: "",
-        email: "",
-        phone: "",
-        date: new Date(),
-        time: "",
-        guests: 1,
-        tableType: "table",
-        extras: "",
-      });
+      setForm(initialForm);
+      setErrors({});
     } catch (err: unknown) {
       setNotice({
         type: "error",
@@ -118,6 +149,8 @@ export default function TableReservationForm() {
         return "border-white/10 bg-white/5 text-white/90";
     }
   };
+
+  const errorTextClass = "mt-1 text-sm text-rose-300";
 
   return (
     <form
@@ -150,7 +183,6 @@ export default function TableReservationForm() {
             </button>
           </div>
 
-          {/* petite barre de style (pure déco) */}
           <div className="mt-3 h-[2px] w-full bg-white/10">
             <div className="h-[2px] w-1/3 bg-white/30" />
           </div>
@@ -162,7 +194,9 @@ export default function TableReservationForm() {
       {/* Informations personnelles */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className={labelClass}>Nom et prénom</label>
+          <label className={labelClass}>
+            Nom et prénom <span className="text-rose-300">*</span>
+          </label>
           <input
             type="text"
             name="name"
@@ -170,12 +204,14 @@ export default function TableReservationForm() {
             value={form.name}
             onChange={handleChange}
             className={inputClass}
-            required
           />
+          {errors.name && <p className={errorTextClass}>{errors.name}</p>}
         </div>
 
         <div>
-          <label className={labelClass}>Email</label>
+          <label className={labelClass}>
+            Email <span className="text-rose-300">*</span>
+          </label>
           <input
             type="email"
             name="email"
@@ -183,12 +219,14 @@ export default function TableReservationForm() {
             value={form.email}
             onChange={handleChange}
             className={inputClass}
-            required
           />
+          {errors.email && <p className={errorTextClass}>{errors.email}</p>}
         </div>
 
         <div className="md:col-span-2">
-          <label className={labelClass}>Téléphone</label>
+          <label className={labelClass}>
+            Téléphone <span className="text-rose-300">*</span>
+          </label>
           <input
             type="tel"
             name="phone"
@@ -196,18 +234,23 @@ export default function TableReservationForm() {
             value={form.phone}
             onChange={handleChange}
             className={inputClass}
-            required
           />
+          {errors.phone && <p className={errorTextClass}>{errors.phone}</p>}
         </div>
       </div>
 
       {/* Détails réservation */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className={labelClass}>Date</label>
+          <label className={labelClass}>
+            Date <span className="text-rose-300">*</span>
+          </label>
           <DatePicker
             selected={form.date}
-            onChange={(date: Date | null) => date && setForm({ ...form, date })}
+            onChange={(date: Date | null) => {
+              if (!date) return;
+              setForm((prev) => ({ ...prev, date }));
+            }}
             className={inputClass}
             dateFormat="dd/MM/yyyy"
             required
@@ -215,15 +258,17 @@ export default function TableReservationForm() {
         </div>
 
         <div>
-          <label className={labelClass}>Heure d’arrivée</label>
+          <label className={labelClass}>
+            Heure d’arrivée <span className="text-rose-300">*</span>
+          </label>
           <input
             type="time"
             name="time"
             value={form.time}
             onChange={handleChange}
             className={inputClass}
-            required
           />
+          {errors.time && <p className={errorTextClass}>{errors.time}</p>}
         </div>
       </div>
 
@@ -268,6 +313,10 @@ export default function TableReservationForm() {
           rows={4}
         />
       </div>
+
+      <p className="text-sm text-white/60">
+        <span className="text-rose-300">*</span> Champs obligatoires
+      </p>
 
       <button
         type="submit"

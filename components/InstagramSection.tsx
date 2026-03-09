@@ -50,10 +50,10 @@ export const InstagramSection = () => {
           viewport={{ once: true, amount: 0.25 }}
         >
           <div className="mb-6 flex items-center gap-3">
-            <span className="h-[2px] w-8 bg-red-500" />
-            <span className="text-sm uppercase tracking-widest text-white">
-              Nos réseaux sociaux
-            </span>
+               <span className="h-[2px] w-12 bg-gradient-to-r from-purple-400 via-fuchsia-400 to-indigo-300" />
+          <span className="text-xs uppercase tracking-[0.35em] text-white/70">
+            Nos réseaux sociaux
+          </span>
           </div>
 
           <h2 className="text-4xl md:text-6xl font-bold leading-tight text-white">

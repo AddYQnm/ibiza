@@ -38,8 +38,8 @@ export default function Footer() {
               Rejoignez-nous
             </h3>
             <div className="flex gap-4">
-              <SocialIcon icon={<FaInstagram />} link="https://www.instagram.com/" />
-              <SocialIcon icon={<FaTiktok />} link="https://www.tiktok.com/" />
+              <SocialIcon icon={<FaInstagram />} link="https://www.instagram.com/ibizaclubrouen/" />
+              <SocialIcon icon={<FaTiktok />} link="https://www.tiktok.com/@ibizaclub.rouen?is_from_webapp=1&sender_device=pc" />
               <SocialIcon icon={<FaSpotify />} link="https://www.spotify.com/" />
             </div>
           </div>
@@ -52,15 +52,21 @@ export default function Footer() {
 
   <ul className="space-y-2 text-sm text-white/70">
     <li className="hover:text-white transition cursor-pointer">
+      <a href="/reservation">
       Tables VIP & réservations
+    </a>
     </li>
 
     <li className="hover:text-white transition cursor-pointer">
-      Speakeasy privatisé
+      <a href="/reservation">
+        Speakeasy privatisé
+      </a>
     </li>
 
     <li className="hover:text-white transition cursor-pointer">
-      Événements privés et corporate
+      <a href="/events">
+        Événements
+      </a>
     </li>
 
     {/* 📞 TELEPHONE */}
@@ -85,9 +91,7 @@ export default function Footer() {
       </a>
     </li>
 
-    <li className="hover:text-white transition cursor-pointer">
-      Dress code & règles du club
-    </li>
+    
   </ul>
 </div>
 

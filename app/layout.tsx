@@ -18,11 +18,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Ibiza Club",
-  description: "Ibiza Club Rouen",
-};
-
 export default function RootLayout({
   children,
 }: {
@@ -31,11 +26,20 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`} 
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <BackgroundGlobal />
-        <NavbarDemo />
-        <main>{children}</main>
+
+        {/* NAVBAR */}
+        <div className="fixed top-0 left-0 w-full z-50">
+          <NavbarDemo />
+        </div>
+
+        {/* CONTENU */}
+        <main className="pt-[55px]">
+          {children}
+        </main>
+
         <Footer />
       </body>
     </html>

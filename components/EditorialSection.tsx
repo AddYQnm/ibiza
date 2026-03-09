@@ -59,7 +59,7 @@ export default function EditorialSection() {
         <div className="absolute inset-0 bg-black/55" />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-3xl px-6">
+      <div className="relative z-10 mx-auto max-w-7xl px-6">
         {/* Eyebrow */}
         <motion.div
           initial={{ opacity: 0, y: 14 }}

@@ -5,6 +5,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectCards, Navigation, Pagination } from "swiper/modules";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import "swiper/css";
 import "swiper/css/effect-cards";
@@ -29,15 +30,14 @@ const Skiper48 = () => {
   );
 
   return (
-    // ✅ IMPORTANT: empêche le scroll horizontal sans changer le rendu
-    <section className="relative w-full min-h-[100svh] overflow-x-clip">
+    <section className="relative w-full overflow-x-hidden">
       <div className="relative z-10">
         <Carousel_002
           images={images}
           loop
           autoplay={!reduceMotion}
           showPagination={false}
-          showNavigation={false}
+          showNavigation
         />
       </div>
     </section>
@@ -50,7 +50,11 @@ export { Skiper48 };
 /*                                 CAROUSEL                                   */
 /* -------------------------------------------------------------------------- */
 
-type CarouselImage = { src: string; mobileSrc: string; alt: string };
+type CarouselImage = {
+  src: string;
+  mobileSrc: string;
+  alt: string;
+};
 
 const Carousel_002 = ({
   images,
@@ -59,7 +63,6 @@ const Carousel_002 = ({
   showNavigation = false,
   loop = true,
   autoplay = false,
-  spaceBetween = 40,
 }: {
   images: CarouselImage[];
   className?: string;
@@ -67,7 +70,6 @@ const Carousel_002 = ({
   showNavigation?: boolean;
   loop?: boolean;
   autoplay?: boolean;
-  spaceBetween?: number;
 }) => {
   const reduceMotion = useReducedMotion();
 
@@ -76,7 +78,7 @@ const Carousel_002 = ({
       initial={reduceMotion ? false : { opacity: 0, y: 30 }}
       animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className={cn("mx-auto max-w-7xl px-4 sm:px-6 py-20 sm:py-32 overflow-x-clip", className)}
+      className={cn("mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-32", className)}
     >
       {/* TITRE */}
       <motion.div
@@ -86,75 +88,145 @@ const Carousel_002 = ({
         viewport={{ once: true, margin: "-10% 0px" }}
         className="mb-14 sm:mb-20"
       >
-        <div className="flex items-center gap-3 mb-5">
+        <div className="mb-5 flex items-center gap-3">
           <span className="h-[2px] w-8 bg-red-500" />
-          <span className="text-xs sm:text-sm uppercase tracking-widest text-white">
+          <span className="text-xs uppercase tracking-widest text-white sm:text-sm">
             Nos events
           </span>
         </div>
 
-        <h2 className="text-3xl sm:text-4xl md:text-6xl font-bold leading-tight text-white">
+        <h2 className="text-3xl font-bold leading-tight text-white sm:text-4xl md:text-6xl">
           Découvrez nos Soirées <br />
           <span className="text-purple-300">Incontournables</span>
         </h2>
       </motion.div>
 
-      {/* ✅ WRAPPER CLIP : garde ton rendu mais coupe le débordement Swiper */}
-      <div className="w-full overflow-x-clip">
+      {/* ZONE CARDS */}
+      <div className="group relative mx-auto w-full max-w-[1500px] px-2 sm:px-4 md:px-16">
+        {showNavigation && (
+          <>
+            <button
+              className="
+                swiper-button-prev-custom
+                absolute left-2 top-1/2 z-30 flex h-11 w-11 -translate-y-1/2
+                items-center justify-center rounded-full border border-white/15
+                bg-black/35 text-white backdrop-blur-xl
+                shadow-[0_8px_30px_rgba(0,0,0,0.35)]
+                transition-all duration-300 ease-out
+                hover:scale-110 hover:border-white/25 hover:bg-black/55
+                active:scale-95
+                sm:left-3 sm:h-12 sm:w-12
+                md:left-4 md:h-14 md:w-14 md:opacity-0 md:group-hover:opacity-100
+              "
+              aria-label="Slide précédente"
+              type="button"
+            >
+              <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
+            </button>
+
+            <button
+              className="
+                swiper-button-next-custom
+                absolute right-2 top-1/2 z-30 flex h-11 w-11 -translate-y-1/2
+                items-center justify-center rounded-full border border-white/15
+                bg-black/35 text-white backdrop-blur-xl
+                shadow-[0_8px_30px_rgba(0,0,0,0.35)]
+                transition-all duration-300 ease-out
+                hover:scale-110 hover:border-white/25 hover:bg-black/55
+                active:scale-95
+                sm:right-3 sm:h-12 sm:w-12
+                md:right-4 md:h-14 md:w-14 md:opacity-0 md:group-hover:opacity-100
+              "
+              aria-label="Slide suivante"
+              type="button"
+            >
+              <ChevronRight className="h-5 w-5 md:h-6 md:w-6" />
+            </button>
+          </>
+        )}
+
         <Swiper
-          spaceBetween={spaceBetween}
-          effect={reduceMotion ? "slide" : "cards"} // ✅ jamais undefined
+          effect="cards"
           grabCursor={!reduceMotion}
           loop={loop}
+          centeredSlides
+          slidesPerView={1}
+          allowTouchMove
           autoplay={
             autoplay && !reduceMotion
-              ? { delay: 2200, disableOnInteraction: false }
+              ? { delay: 2600, disableOnInteraction: false }
               : false
           }
           pagination={showPagination ? { clickable: true } : false}
           navigation={
             showNavigation
-              ? { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" }
+              ? {
+                  prevEl: ".swiper-button-prev-custom",
+                  nextEl: ".swiper-button-next-custom",
+                }
               : false
           }
+          cardsEffect={{
+            perSlideOffset: 10,
+            perSlideRotate: 1,
+            rotate: true,
+            slideShadows: false,
+          }}
           className="
-            w-full
-            max-w-[320px]
-            sm:max-w-[500px]
-            md:max-w-[900px]
-            h-[360px]
-            sm:h-[500px]
-            md:h-[600px]
             mx-auto
+            w-full
+            max-w-[340px]
+            sm:max-w-[560px]
+            md:max-w-[900px]
+            lg:max-w-[1100px]
+            xl:max-w-[1280px]
+            overflow-visible
           "
           modules={[EffectCards, Autoplay, Pagination, Navigation]}
         >
           {images.map((image, index) => (
-            <SwiperSlide key={image.src} className="rounded-3xl overflow-hidden shadow-2xl">
-              {/* Desktop */}
-              <div className="hidden md:block relative h-full w-full">
-                <Image
-                  src={image.src}
-                  alt={image.alt}
-                  fill
-                  className="object-cover"
-                  sizes="(min-width: 768px) 900px, 0px"
-                  priority={index === 0}
-                  loading={index === 0 ? "eager" : "lazy"}
-                />
-              </div>
+            <SwiperSlide key={image.src} className="overflow-hidden rounded-[28px] shadow-2xl">
+              <div className="relative aspect-video w-full overflow-hidden rounded-[28px] bg-black">
+                {/* Fond doux */}
+                <div className="absolute inset-0 scale-110 opacity-30 blur-2xl">
+                  <Image
+                    src={image.src}
+                    alt={image.alt}
+                    fill
+                    className="object-cover"
+                    sizes="100vw"
+                    priority={index === 0}
+                  />
+                </div>
 
-              {/* Mobile */}
-              <div className="block md:hidden relative h-full w-full">
-                <Image
-                  src={image.mobileSrc}
-                  alt={image.alt}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 767px) 320px, 0px"
-                  priority={index === 0}
-                  loading={index === 0 ? "eager" : "lazy"}
-                />
+                {/* Desktop */}
+                <div className="relative hidden h-full w-full md:block">
+                  <Image
+                    src={image.src}
+                    alt={image.alt}
+                    fill
+                    className="object-contain"
+                    sizes="(min-width: 1280px) 1280px, (min-width: 1024px) 1100px, (min-width: 768px) 900px, 100vw"
+                    priority={index === 0}
+                    loading={index === 0 ? "eager" : "lazy"}
+                  />
+                </div>
+
+                {/* Mobile */}
+                <div className="relative block h-full w-full md:hidden">
+                  <Image
+                    src={image.mobileSrc}
+                    alt={image.alt}
+                    fill
+                    className="object-contain"
+                    sizes="100vw"
+                    priority={index === 0}
+                    loading={index === 0 ? "eager" : "lazy"}
+                  />
+                </div>
+
+                {/* léger overlay premium */}
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-white/5" />
               </div>
             </SwiperSlide>
           ))}
@@ -173,8 +245,8 @@ const Carousel_002 = ({
           href="/events"
           className="
             group relative inline-flex items-center gap-3
-            text-sm md:text-base font-medium tracking-widest
-            uppercase text-white/90
+            text-sm font-medium uppercase tracking-widest text-white/90
+            md:text-base
           "
         >
           En savoir plus
@@ -190,8 +262,7 @@ const Carousel_002 = ({
 
           <span
             className="
-              pointer-events-none
-              absolute left-0 -bottom-2 h-[2px] w-full
+              pointer-events-none absolute left-0 -bottom-2 h-[2px] w-full
               origin-left scale-x-0
               bg-gradient-to-r from-purple-400 via-fuchsia-400 to-indigo-400
               transition-transform duration-500 ease-out

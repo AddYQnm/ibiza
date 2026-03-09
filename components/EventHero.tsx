@@ -1,6 +1,8 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion, easeInOut } from "framer-motion";
+
+const montserratClass = "font-montserrat";
 
 export default function EventHero() {
   const reduceMotion = useReducedMotion();
@@ -42,14 +44,17 @@ export default function EventHero() {
       <div className="relative z-10 flex h-full items-center px-6">
         <div className="mx-auto max-w-6xl text-left">
           {/* EYEBROW */}
-          <motion.span
-            initial={reduceMotion ? false : { opacity: 0, y: 8 }}
-            animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.45 }}
-            className="block mb-6 text-xs sm:text-sm uppercase tracking-[0.32em] text-white/60"
-          >
-            Ibiza Club • Événements
-          </motion.span>
+             <motion.div
+                        {...fadeUp(!!reduceMotion, 0)}
+                        className="mb-6 flex items-center gap-3 sm:mb-8 sm:gap-4"
+                      >
+                        <span className="h-[2px] w-10 bg-gradient-to-r from-[#8F72FF] via-[#E05BAA] to-[#B89CFF] sm:w-14" />
+                        <span
+                          className={`${montserratClass} text-[10px] uppercase tracking-[0.28em] text-white/65 sm:text-xs sm:tracking-[0.45em]`}
+                        >
+                          Ibiza Club • Événements
+                        </span>
+                      </motion.div>
 
           {/* TITLE */}
           <motion.h1
@@ -129,4 +134,12 @@ export default function EventHero() {
       )}
     </section>
   );
+}
+
+function fadeUp(reduceMotion: boolean, delay: number) {
+  return {
+    initial: reduceMotion ? false : { opacity: 0, y: 22 },
+    animate: reduceMotion ? undefined : { opacity: 1, y: 0 },
+    transition: { delay, duration: 0.65, ease: easeInOut },
+  };
 }

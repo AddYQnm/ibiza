@@ -11,26 +11,44 @@ type Notice = {
   message?: string;
 };
 
-export default function PrivatisationForm() {
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    company: "",
-    date: new Date(),
-    startTime: "",
-    endTime: "",
-    eventType: "anniversaire",
-    location: "Speakeasy",
-    guests: 10,
-    services: "",
-    message: "",
-  });
+type FormState = {
+  name: string;
+  email: string;
+  phone: string;
+  company: string;
+  date: Date;
+  startTime: string;
+  endTime: string;
+  eventType: string;
+  location: string;
+  guests: number;
+  services: string;
+  message: string;
+};
 
+type FormErrors = Partial<Record<keyof FormState, string>>;
+
+const initialForm: FormState = {
+  name: "",
+  email: "",
+  phone: "",
+  company: "",
+  date: new Date(),
+  startTime: "",
+  endTime: "",
+  eventType: "anniversaire",
+  location: "Speakeasy",
+  guests: 10,
+  services: "",
+  message: "",
+};
+
+export default function PrivatisationForm() {
+  const [form, setForm] = useState<FormState>(initialForm);
+  const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notice, setNotice] = useState<Notice | null>(null);
 
-  // auto-hide (optionnel)
   useEffect(() => {
     if (!notice) return;
     const id = window.setTimeout(() => setNotice(null), 6000);
@@ -48,10 +66,44 @@ export default function PrivatisationForm() {
       ...prev,
       [name]: name === "guests" ? Number(value) : value,
     }));
+
+    if (errors[name as keyof FormState]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: "",
+      }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors: FormErrors = {};
+
+    if (!form.name.trim()) newErrors.name = "Le nom et prénom est requis.";
+    if (!form.email.trim()) newErrors.email = "L’email est requis.";
+    if (!form.phone.trim()) newErrors.phone = "Le téléphone est requis.";
+    if (!form.startTime.trim())
+      newErrors.startTime = "L’heure de début est requise.";
+    if (!form.endTime.trim())
+      newErrors.endTime = "L’heure de fin est requise.";
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const isValid = validateForm();
+
+    if (!isValid) {
+      setNotice({
+        type: "error",
+        title: "Informations manquantes",
+        message: "Veuillez remplir tous les champs obligatoires marqués d’un *.",
+      });
+      return;
+    }
 
     setIsSubmitting(true);
     setNotice({
@@ -87,25 +139,15 @@ export default function PrivatisationForm() {
       setNotice({
         type: "success",
         title: "Demande envoyée",
-        message: "Nous revenons vers vous très rapidement pour organiser votre événement.",
+        message:
+          "Nous revenons vers vous très rapidement pour organiser votre événement.",
       });
 
-      setForm({
-        name: "",
-        email: "",
-        phone: "",
-        company: "",
-        date: new Date(),
-        startTime: "",
-        endTime: "",
-        eventType: "anniversaire",
-        location: "Speakeasy",
-        guests: 10,
-        services: "",
-        message: "",
-      });
+      setForm(initialForm);
+      setErrors({});
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : "Erreur inconnue";
+      const errorMessage =
+        err instanceof Error ? err.message : "Erreur inconnue";
       setNotice({
         type: "error",
         title: "Erreur serveur",
@@ -133,12 +175,13 @@ export default function PrivatisationForm() {
     }
   };
 
+  const errorTextClass = "mt-1 text-sm text-rose-300";
+
   return (
     <form
       onSubmit={handleSubmit}
       className="bg-gradient-to-br from-black/60 via-gray-900/60 to-black/60 p-8 rounded-xl shadow-xl space-y-6 backdrop-blur-md"
     >
-      {/* ✅ Message propre en haut */}
       {notice && (
         <div
           className={`relative overflow-hidden rounded-xl border p-4 ${noticeStyles(
@@ -174,10 +217,11 @@ export default function PrivatisationForm() {
         Privatisation / Événement
       </h2>
 
-      {/* Informations personnelles */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className={labelClass}>Nom et prénom</label>
+          <label className={labelClass}>
+            Nom et prénom <span className="text-rose-300">*</span>
+          </label>
           <input
             type="text"
             name="name"
@@ -185,12 +229,14 @@ export default function PrivatisationForm() {
             value={form.name}
             onChange={handleChange}
             className={inputClass}
-            required
           />
+          {errors.name && <p className={errorTextClass}>{errors.name}</p>}
         </div>
 
         <div>
-          <label className={labelClass}>Email</label>
+          <label className={labelClass}>
+            Email <span className="text-rose-300">*</span>
+          </label>
           <input
             type="email"
             name="email"
@@ -198,12 +244,14 @@ export default function PrivatisationForm() {
             value={form.email}
             onChange={handleChange}
             className={inputClass}
-            required
           />
+          {errors.email && <p className={errorTextClass}>{errors.email}</p>}
         </div>
 
         <div>
-          <label className={labelClass}>Téléphone</label>
+          <label className={labelClass}>
+            Téléphone <span className="text-rose-300">*</span>
+          </label>
           <input
             type="tel"
             name="phone"
@@ -211,8 +259,8 @@ export default function PrivatisationForm() {
             value={form.phone}
             onChange={handleChange}
             className={inputClass}
-            required
           />
+          {errors.phone && <p className={errorTextClass}>{errors.phone}</p>}
         </div>
 
         <div>
@@ -228,10 +276,11 @@ export default function PrivatisationForm() {
         </div>
       </div>
 
-      {/* Détails événement */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="md:col-span-1">
-          <label className={labelClass}>Date</label>
+          <label className={labelClass}>
+            Date <span className="text-rose-300">*</span>
+          </label>
           <DatePicker
             selected={form.date}
             onChange={(date: Date | null) =>
@@ -244,31 +293,38 @@ export default function PrivatisationForm() {
         </div>
 
         <div>
-          <label className={labelClass}>Heure de début</label>
+          <label className={labelClass}>
+            Heure de début <span className="text-rose-300">*</span>
+          </label>
           <input
             type="time"
             name="startTime"
             value={form.startTime}
             onChange={handleChange}
             className={inputClass}
-            required
           />
+          {errors.startTime && (
+            <p className={errorTextClass}>{errors.startTime}</p>
+          )}
         </div>
 
         <div>
-          <label className={labelClass}>Heure de fin</label>
+          <label className={labelClass}>
+            Heure de fin <span className="text-rose-300">*</span>
+          </label>
           <input
             type="time"
             name="endTime"
             value={form.endTime}
             onChange={handleChange}
             className={inputClass}
-            required
           />
+          {errors.endTime && (
+            <p className={errorTextClass}>{errors.endTime}</p>
+          )}
         </div>
       </div>
 
-      {/* Type d'événement et lieu */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label className={labelClass}>Type d’événement</label>
@@ -312,7 +368,6 @@ export default function PrivatisationForm() {
         </div>
       </div>
 
-      {/* Services supplémentaires */}
       <div>
         <label className={labelClass}>Services supplémentaires</label>
         <textarea
@@ -325,7 +380,6 @@ export default function PrivatisationForm() {
         />
       </div>
 
-      {/* Message */}
       <div>
         <label className={labelClass}>Message / détails</label>
         <textarea
@@ -337,6 +391,10 @@ export default function PrivatisationForm() {
           rows={4}
         />
       </div>
+
+      <p className="text-sm text-white/60">
+        <span className="text-rose-300">*</span> Champs obligatoires
+      </p>
 
       <button
         type="submit"
