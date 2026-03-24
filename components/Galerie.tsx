@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -33,7 +32,7 @@ export function SkiperGalleryLite() {
   const galleryRef = useRef<HTMLDivElement>(null);
   const colRefs = useRef<(HTMLDivElement | null)[]>([]);
   const reduceMotionRef = usePrefersReducedMotionRef();
-  const [visible, setVisible] = useState(false);
+  const [parallaxReady, setParallaxReady] = useState(false);
 
   const cols = useMemo(() => [
     [IMAGES[0], IMAGES[1], IMAGES[2]],
@@ -42,26 +41,27 @@ export function SkiperGalleryLite() {
     [IMAGES[7], IMAGES[8], IMAGES[9]],
   ], []);
 
-  // Déclenche le rendu complet quand la section entre dans le viewport
+  // Lance le parallax dès qu'un pixel de la section est visible
+  // Les images elles-mêmes sont rendues IMMÉDIATEMENT — pas de gate
   useEffect(() => {
     const gallery = galleryRef.current;
     if (!gallery) return;
     const io = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setVisible(true);
+          setParallaxReady(true);
           io.disconnect();
         }
       },
-      { threshold: 0.05 }
+      { threshold: 0.01, rootMargin: "200px" } // précharge 200px avant l'entrée dans le viewport
     );
     io.observe(gallery);
     return () => io.disconnect();
   }, []);
 
-  // Parallax rAF — seulement si visible + motion autorisé
+  // Parallax rAF — seulement après visibilité
   useEffect(() => {
-    if (!visible) return;
+    if (!parallaxReady) return;
     const gallery = galleryRef.current;
     if (!gallery) return;
 
@@ -92,17 +92,19 @@ export function SkiperGalleryLite() {
 
       currentP = lerp(currentP, targetP, 0.08);
 
-      // Amplitudes réduites pour éviter les débordements
       const offsets = [-0.12, -0.22, -0.10, -0.18];
       const amps    = [ 0.24,  0.44,  0.18,  0.38];
-
       const h = gallery.getBoundingClientRect().height || 1;
 
       colRefs.current.forEach((el, i) => {
         if (!el) return;
-        const y = h * (offsets[i] + amps[i] * currentP);
-        el.style.transform = `translate3d(0,${y}px,0)`;
+        el.style.transform = `translate3d(0,${h * (offsets[i] + amps[i] * currentP)}px,0)`;
       });
+
+      // Relance le rAF seulement si on n'a pas encore convergé
+      if (Math.abs(currentP - targetP) > 0.0005) {
+        rafId = requestAnimationFrame(tick);
+      }
     };
 
     const schedule = () => { if (!rafId) rafId = requestAnimationFrame(tick); };
@@ -126,15 +128,10 @@ export function SkiperGalleryLite() {
       document.removeEventListener("visibilitychange", onVis);
       if (rafId) cancelAnimationFrame(rafId);
     };
-  }, [visible, reduceMotionRef]);
+  }, [parallaxReady, reduceMotionRef]);
 
   return (
-    // ✅ <section> sémantique, pas de <main>
-    <section
-      aria-label="Galerie photos"
-      className="w-full overflow-hidden"
-    >
-      {/* Wrapper hauteur fixe — overflow hidden pour masquer le dépassement parallax */}
+    <section aria-label="Galerie photos" className="w-full overflow-hidden">
       <div
         ref={galleryRef}
         className="relative flex h-[80vh] gap-[1vw] overflow-hidden px-[1vw] md:h-[100vh]"
@@ -146,25 +143,28 @@ export function SkiperGalleryLite() {
             className="relative flex h-full w-1/4 flex-shrink-0 flex-col gap-[1vw]"
             style={{ willChange: "transform" }}
           >
-            {images.map((src, imgIdx) => (
-              <figure
-                key={src}
-                className="relative min-h-0 flex-1 overflow-hidden rounded-lg"
-              >
-                <Image
-                  src={src}
-                  alt={`Photo Ibiza Club ${colIdx * 3 + imgIdx + 1}`}
-                  fill
-                  className="object-cover"
-                  sizes="25vw"
-                  // Priorité uniquement sur la première image de la première colonne
-                  priority={colIdx === 0 && imgIdx === 0}
-                  loading={colIdx === 0 && imgIdx === 0 ? "eager" : "lazy"}
-                  decoding="async"
-                  quality={75}
-                />
-              </figure>
-            ))}
+            {images.map((src, imgIdx) => {
+              // Premières images des 2 premières colonnes = potentiellement above-the-fold
+              const isEager = colIdx < 2 && imgIdx === 0;
+              return (
+                <figure
+                  key={src}
+                  className="relative min-h-0 flex-1 overflow-hidden rounded-lg"
+                >
+                  <Image
+                    src={src}
+                    alt={`Photo Ibiza Club ${colIdx * 3 + imgIdx + 1}`}
+                    fill
+                    className="object-cover"
+                    sizes="25vw"
+                    priority={isEager}
+                    loading={isEager ? "eager" : "lazy"}
+                    decoding="async"
+                    quality={75}
+                  />
+                </figure>
+              );
+            })}
           </div>
         ))}
       </div>
