@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
 const IMAGES = [
@@ -16,155 +16,142 @@ const IMAGES = [
   "/images/photo/A22A6909.jpeg",
 ];
 
-function usePrefersReducedMotionRef() {
-  const ref = useRef(false);
-  useEffect(() => {
-    const m = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const update = () => { ref.current = m.matches; };
-    update();
-    m.addEventListener("change", update);
-    return () => m.removeEventListener("change", update);
-  }, []);
-  return ref;
-}
-
 export function SkiperGalleryLite() {
   const galleryRef = useRef<HTMLDivElement>(null);
-  const colRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const reduceMotionRef = usePrefersReducedMotionRef();
-  const [parallaxReady, setParallaxReady] = useState(false);
+  const colRefs = useRef<HTMLDivElement[]>([]);
+  const [isMobile, setIsMobile] = useState(false);
 
-  const cols = useMemo(() => [
-    [IMAGES[0], IMAGES[1], IMAGES[2]],
-    [IMAGES[3], IMAGES[4], IMAGES[5]],
-    [IMAGES[6], IMAGES[7], IMAGES[8]],
-    [IMAGES[7], IMAGES[8], IMAGES[9]],
-  ], []);
-
-  // Lance le parallax dès qu'un pixel de la section est visible
-  // Les images elles-mêmes sont rendues IMMÉDIATEMENT — pas de gate
   useEffect(() => {
-    const gallery = galleryRef.current;
-    if (!gallery) return;
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setParallaxReady(true);
-          io.disconnect();
-        }
-      },
-      { threshold: 0.01, rootMargin: "200px" } // précharge 200px avant l'entrée dans le viewport
-    );
-    io.observe(gallery);
-    return () => io.disconnect();
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
   }, []);
 
-  // Parallax rAF — seulement après visibilité
   useEffect(() => {
-    if (!parallaxReady) return;
+    if (isMobile) return;
+
     const gallery = galleryRef.current;
     if (!gallery) return;
 
     let rafId = 0;
-    let running = true;
-    let currentP = 0;
-    let targetP = 0;
+    let current = 0;
+    let target = 0;
 
-    const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
+    const speeds = [0.15, 0.35, 0.1, 0.25];
+
     const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
-    const computeTarget = () => {
-      const rect = gallery.getBoundingClientRect();
-      const vh = window.innerHeight;
-      targetP = clamp01((vh - rect.top) / (vh + rect.height));
-    };
-
-    const tick = () => {
+    const update = () => {
       rafId = 0;
-      if (!running) return;
 
-      if (reduceMotionRef.current) {
-        colRefs.current.forEach((el) => {
-          if (el) el.style.transform = "translate3d(0,0,0)";
-        });
-        return;
-      }
-
-      currentP = lerp(currentP, targetP, 0.08);
-
-      const offsets = [-0.12, -0.22, -0.10, -0.18];
-      const amps    = [ 0.24,  0.44,  0.18,  0.38];
-      const h = gallery.getBoundingClientRect().height || 1;
+      current = lerp(current, target, 0.08);
 
       colRefs.current.forEach((el, i) => {
         if (!el) return;
-        el.style.transform = `translate3d(0,${h * (offsets[i] + amps[i] * currentP)}px,0)`;
+        el.style.transform = `translate3d(0, ${current * speeds[i]}px, 0)`;
       });
 
-      // Relance le rAF seulement si on n'a pas encore convergé
-      if (Math.abs(currentP - targetP) > 0.0005) {
-        rafId = requestAnimationFrame(tick);
+      if (Math.abs(current - target) > 0.1) {
+        rafId = requestAnimationFrame(update);
       }
     };
 
-    const schedule = () => { if (!rafId) rafId = requestAnimationFrame(tick); };
-    const onScroll = () => { computeTarget(); schedule(); };
-    const onResize = () => { computeTarget(); schedule(); };
-    const onVis = () => {
-      running = document.visibilityState !== "hidden";
-      if (running) { computeTarget(); schedule(); }
+    const onScroll = () => {
+      const rect = gallery.getBoundingClientRect();
+      const vh = window.innerHeight;
+
+      // progression locale (super important)
+      const progress = (vh - rect.top) / (vh + rect.height);
+
+      target = progress * 300; // intensité contrôlée
+
+      if (!rafId) rafId = requestAnimationFrame(update);
     };
 
-    computeTarget();
-    schedule();
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          window.addEventListener("scroll", onScroll, { passive: true });
+          onScroll();
+        } else {
+          window.removeEventListener("scroll", onScroll);
+        }
+      },
+      { threshold: 0 }
+    );
 
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onResize, { passive: true });
-    document.addEventListener("visibilitychange", onVis);
+    io.observe(gallery);
 
     return () => {
+      io.disconnect();
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onResize);
-      document.removeEventListener("visibilitychange", onVis);
       if (rafId) cancelAnimationFrame(rafId);
     };
-  }, [parallaxReady, reduceMotionRef]);
+  }, [isMobile]);
 
+  const cols = [
+    [IMAGES[0], IMAGES[1], IMAGES[2]],
+    [IMAGES[3], IMAGES[4], IMAGES[5]],
+    [IMAGES[6], IMAGES[7], IMAGES[8]],
+    [IMAGES[7], IMAGES[8], IMAGES[9]],
+  ];
+
+  // 📱 MOBILE (inchangé, ultra clean)
+  if (isMobile) {
+    return (
+      <section className="w-full px-3">
+        <div className="grid grid-cols-2 gap-3">
+          {IMAGES.map((src) => (
+            <div
+              key={src}
+              className="relative aspect-[3/4] overflow-hidden rounded-lg"
+            >
+              <Image
+                src={src}
+                alt="Ibiza Club"
+                fill
+                className="object-cover"
+                sizes="50vw"
+                quality={60}
+                loading="lazy"
+              />
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  // 💻 DESKTOP ULTRA SMOOTH
   return (
-    <section aria-label="Galerie photos" className="w-full overflow-hidden">
-      <div
-        ref={galleryRef}
-        className="relative flex h-[80vh] gap-[1vw] overflow-hidden px-[1vw] md:h-[100vh]"
-      >
+    <section ref={galleryRef} className="w-full overflow-hidden">
+      <div className="flex h-[100vh] gap-[1vw] px-[1vw]">
         {cols.map((images, colIdx) => (
           <div
             key={colIdx}
-            ref={(el) => { colRefs.current[colIdx] = el; }}
-            className="relative flex h-full w-1/4 flex-shrink-0 flex-col gap-[1vw]"
+            ref={(el) => {
+              if (el) colRefs.current[colIdx] = el;
+            }}
+            className="flex flex-col w-1/4 gap-[1vw]"
             style={{ willChange: "transform" }}
           >
-            {images.map((src, imgIdx) => {
-              // Premières images des 2 premières colonnes = potentiellement above-the-fold
-              const isEager = colIdx < 2 && imgIdx === 0;
-              return (
-                <figure
-                  key={src}
-                  className="relative min-h-0 flex-1 overflow-hidden rounded-lg"
-                >
-                  <Image
-                    src={src}
-                    alt={`Photo Ibiza Club ${colIdx * 3 + imgIdx + 1}`}
-                    fill
-                    className="object-cover"
-                    sizes="25vw"
-                    priority={isEager}
-                    loading={isEager ? "eager" : "lazy"}
-                    decoding="async"
-                    quality={75}
-                  />
-                </figure>
-              );
-            })}
+            {images.map((src) => (
+              <div
+                key={src}
+                className="relative flex-1 overflow-hidden rounded-lg"
+              >
+                <Image
+                  src={src}
+                  alt="Ibiza Club"
+                  fill
+                  className="object-cover"
+                  sizes="25vw"
+                  quality={60}
+                  loading="lazy"
+                />
+              </div>
+            ))}
           </div>
         ))}
       </div>
