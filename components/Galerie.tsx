@@ -17,129 +17,66 @@ const IMAGES = [
   "/images/photo/A22A6909.jpeg",
 ];
 
-function useMediaQueryRef(query: string) {
-  const ref = useRef(false);
-
-  useEffect(() => {
-    const m = window.matchMedia(query);
-    const update = () => (ref.current = m.matches);
-    update();
-
-    if (m.addEventListener) m.addEventListener("change", update);
-    else m.addListener(update);
-
-    return () => {
-      if (m.removeEventListener) m.removeEventListener("change", update);
-      else m.removeListener(update);
-    };
-  }, [query]);
-
-  return ref;
-}
-
 function usePrefersReducedMotionRef() {
   const ref = useRef(false);
-
   useEffect(() => {
     const m = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const update = () => (ref.current = m.matches);
+    const update = () => { ref.current = m.matches; };
     update();
-
-    if (m.addEventListener) m.addEventListener("change", update);
-    else m.addListener(update);
-
-    return () => {
-      if (m.removeEventListener) m.removeEventListener("change", update);
-      else m.removeListener(update);
-    };
+    m.addEventListener("change", update);
+    return () => m.removeEventListener("change", update);
   }, []);
-
   return ref;
 }
 
-/**
- * SkiperGalleryLite (optimisée)
- * - Mobile: render progressif des images (évite 12 images d’un coup)
- * - Desktop: full render ok
- */
 export function SkiperGalleryLite() {
   const galleryRef = useRef<HTMLDivElement>(null);
   const colRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const isMobileRef = useMediaQueryRef("(max-width: 768px)");
   const reduceMotionRef = usePrefersReducedMotionRef();
+  const [visible, setVisible] = useState(false);
 
-  // Colonnes
-  const col1 = useMemo(() => [IMAGES[0], IMAGES[1], IMAGES[2]], []);
-  const col2 = useMemo(() => [IMAGES[3], IMAGES[4], IMAGES[5]], []);
-  const col3 = useMemo(() => [IMAGES[6], IMAGES[7], IMAGES[8]], []);
-  const col4 = useMemo(() => [IMAGES[7], IMAGES[8], IMAGES[9]], []);
+  const cols = useMemo(() => [
+    [IMAGES[0], IMAGES[1], IMAGES[2]],
+    [IMAGES[3], IMAGES[4], IMAGES[5]],
+    [IMAGES[6], IMAGES[7], IMAGES[8]],
+    [IMAGES[7], IMAGES[8], IMAGES[9]],
+  ], []);
 
-  // ✅ rendu progressif : combien d’images par colonne on affiche
-  const [visibleCount, setVisibleCount] = useState(() => {
-    // SSR safe: on commence “light”, puis on upgrade côté client
-    return 2;
-  });
-
-  // ✅ quand la section entre dans le viewport, on charge le reste en idle
+  // Déclenche le rendu complet quand la section entre dans le viewport
   useEffect(() => {
     const gallery = galleryRef.current;
     if (!gallery) return;
-
-    const isMobileNow = () => isMobileRef.current;
-
     const io = new IntersectionObserver(
-      (entries) => {
-        const e = entries[0];
-        if (!e?.isIntersecting) return;
-
-        // Desktop: on peut afficher tout de suite
-        if (!isMobileNow()) {
-          setVisibleCount(3);
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
           io.disconnect();
-          return;
         }
-
-        // Mobile: d’abord 2 images/colonne, puis 3 après un moment “idle”
-        setVisibleCount(2);
-
-        const schedule = () => setVisibleCount(3);
-
-        // requestIdleCallback si dispo, sinon timeout
-        if ("requestIdleCallback" in window) {
-          (window as any).requestIdleCallback(schedule, { timeout: 1200 });
-        } else {
-          setTimeout(schedule, 500);
-        }
-
-        io.disconnect();
       },
-      { root: null, threshold: 0.15 }
+      { threshold: 0.05 }
     );
-
     io.observe(gallery);
     return () => io.disconnect();
-  }, [isMobileRef]);
+  }, []);
 
-  // rAF parallax (inchangé, mais un poil optimisé)
+  // Parallax rAF — seulement si visible + motion autorisé
   useEffect(() => {
+    if (!visible) return;
     const gallery = galleryRef.current;
     if (!gallery) return;
 
     let rafId = 0;
     let running = true;
-
     let currentP = 0;
     let targetP = 0;
 
-    const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
+    const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
     const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
-    const computeTargetProgress = () => {
+    const computeTarget = () => {
       const rect = gallery.getBoundingClientRect();
-      const vh = window.innerHeight || 1;
-      const start = vh;
-      const end = -rect.height;
-      targetP = clamp01((start - rect.top) / (start - end));
+      const vh = window.innerHeight;
+      targetP = clamp01((vh - rect.top) / (vh + rect.height));
     };
 
     const tick = () => {
@@ -147,67 +84,40 @@ export function SkiperGalleryLite() {
       if (!running) return;
 
       if (reduceMotionRef.current) {
-        currentP = 0;
-        for (const el of colRefs.current) {
+        colRefs.current.forEach((el) => {
           if (el) el.style.transform = "translate3d(0,0,0)";
-        }
+        });
         return;
       }
 
-      currentP = lerp(currentP, targetP, 0.085);
+      currentP = lerp(currentP, targetP, 0.08);
 
-      const mobile = isMobileRef.current;
+      // Amplitudes réduites pour éviter les débordements
+      const offsets = [-0.12, -0.22, -0.10, -0.18];
+      const amps    = [ 0.24,  0.44,  0.18,  0.38];
 
-      const baseTopDesktop = [-0.45, -0.95, -0.45, -0.75];
-      const baseTopMobile = [-0.30, -0.70, -0.30, -0.55];
+      const h = gallery.getBoundingClientRect().height || 1;
 
-      const ampsDesktop = [1.7, 2.6, 1.05, 2.4];
-      const ampsMobile = [1.15, 1.75, 0.85, 1.55];
-
-      const rect = gallery.getBoundingClientRect();
-      const h = rect.height || 1;
-
-      const tops = mobile ? baseTopMobile : baseTopDesktop;
-      const amps = mobile ? ampsMobile : ampsDesktop;
-
-      for (let i = 0; i < 4; i++) {
-        const el = colRefs.current[i];
-        if (!el) continue;
-
-        const base = h * tops[i];
-        const move = h * amps[i] * currentP;
-
-        el.style.transform = `translate3d(0, ${base + move}px, 0)`;
-      }
+      colRefs.current.forEach((el, i) => {
+        if (!el) return;
+        const y = h * (offsets[i] + amps[i] * currentP);
+        el.style.transform = `translate3d(0,${y}px,0)`;
+      });
     };
 
-    const schedule = () => {
-      if (rafId) return;
-      rafId = requestAnimationFrame(tick);
+    const schedule = () => { if (!rafId) rafId = requestAnimationFrame(tick); };
+    const onScroll = () => { computeTarget(); schedule(); };
+    const onResize = () => { computeTarget(); schedule(); };
+    const onVis = () => {
+      running = document.visibilityState !== "hidden";
+      if (running) { computeTarget(); schedule(); }
     };
 
-    const onScroll = () => {
-      computeTargetProgress();
-      schedule();
-    };
-    const onResize = () => {
-      computeTargetProgress();
-      schedule();
-    };
-
-    computeTargetProgress();
+    computeTarget();
     schedule();
 
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onResize, { passive: true });
-
-    const onVis = () => {
-      running = document.visibilityState !== "hidden";
-      if (running) {
-        computeTargetProgress();
-        schedule();
-      }
-    };
     document.addEventListener("visibilitychange", onVis);
 
     return () => {
@@ -216,99 +126,48 @@ export function SkiperGalleryLite() {
       document.removeEventListener("visibilitychange", onVis);
       if (rafId) cancelAnimationFrame(rafId);
     };
-  }, [isMobileRef, reduceMotionRef]);
+  }, [visible, reduceMotionRef]);
 
   return (
-    <main className="w-full text-black">
+    // ✅ <section> sémantique, pas de <main>
+    <section
+      aria-label="Galerie photos"
+      className="w-full overflow-hidden"
+    >
+      {/* Wrapper hauteur fixe — overflow hidden pour masquer le dépassement parallax */}
       <div
         ref={galleryRef}
-        className="
-          relative box-border flex h-[175vh] gap-[2vw] overflow-hidden p-[2vw]
-          max-md:h-[160vh]
-        "
+        className="relative flex h-[80vh] gap-[1vw] overflow-hidden px-[1vw] md:h-[100vh]"
       >
-        <ColumnLite
-          setRef={(el) => (colRefs.current[0] = el)}
-          images={col1}
-          visibleCount={visibleCount}
-          priorityFirst
-        />
-        <ColumnLite
-          setRef={(el) => (colRefs.current[1] = el)}
-          images={col2}
-          visibleCount={visibleCount}
-        />
-        <ColumnLite
-          setRef={(el) => (colRefs.current[2] = el)}
-          images={col3}
-          visibleCount={visibleCount}
-        />
-        <ColumnLite
-          setRef={(el) => (colRefs.current[3] = el)}
-          images={col4}
-          visibleCount={visibleCount}
-        />
-      </div>
-    </main>
-  );
-}
-
-function ColumnLite({
-  images,
-  setRef,
-  priorityFirst,
-  visibleCount,
-}: {
-  images: string[];
-  setRef: (el: HTMLDivElement | null) => void;
-  priorityFirst?: boolean;
-  visibleCount: number; // ✅ combien d’images rendre
-}) {
-  // ✅ ne rend que visibleCount images (mobile: 2 puis 3)
-  const toRender = images.slice(0, visibleCount);
-
-  return (
-    <div
-      ref={setRef}
-      className="
-        relative flex h-full flex-col gap-[1vw]
-        w-1/4 min-w-[320px]
-        max-md:w-1/2 max-md:min-w-[160px] sm:max-md:min-w-[220px]
-      "
-      style={{
-        willChange: "transform",
-        transform: "translate3d(0,0,0)",
-        contain: "layout paint style",
-      }}
-    >
-      {toRender.map((src, i) => (
-        <figure key={`${src}-${i}`} className="relative w-full flex-1 overflow-hidden rounded">
-          <Image
-            src={src}
-            alt="photo"
-            fill
-            className="pointer-events-none object-cover"
-            sizes="(max-width: 768px) 50vw, 25vw"
-            // ✅ charge juste la première image en priorité
-            priority={priorityFirst && i === 0}
-            loading={priorityFirst && i === 0 ? "eager" : "lazy"}
-            // ✅ très bon pour fluidité
-            decoding="async"
-            // ✅ baisse un peu la qualité (gros gain mobile)
-            quality={75}
-          />
-        </figure>
-      ))}
-
-      {/* ✅ placeholders pour garder les hauteurs/flow identiques quand on ajoute les images */}
-      {images.length > toRender.length &&
-        Array.from({ length: images.length - toRender.length }).map((_, idx) => (
+        {cols.map((images, colIdx) => (
           <div
-            key={`ph-${idx}`}
-            className="relative w-full flex-1 rounded bg-white/5"
-            aria-hidden="true"
-          />
+            key={colIdx}
+            ref={(el) => { colRefs.current[colIdx] = el; }}
+            className="relative flex h-full w-1/4 flex-shrink-0 flex-col gap-[1vw]"
+            style={{ willChange: "transform" }}
+          >
+            {images.map((src, imgIdx) => (
+              <figure
+                key={src}
+                className="relative min-h-0 flex-1 overflow-hidden rounded-lg"
+              >
+                <Image
+                  src={src}
+                  alt={`Photo Ibiza Club ${colIdx * 3 + imgIdx + 1}`}
+                  fill
+                  className="object-cover"
+                  sizes="25vw"
+                  // Priorité uniquement sur la première image de la première colonne
+                  priority={colIdx === 0 && imgIdx === 0}
+                  loading={colIdx === 0 && imgIdx === 0 ? "eager" : "lazy"}
+                  decoding="async"
+                  quality={75}
+                />
+              </figure>
+            ))}
+          </div>
         ))}
-    </div>
+      </div>
+    </section>
   );
 }
