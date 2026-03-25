@@ -78,7 +78,7 @@ export default function HeroVideo() {
           <video
             ref={videoRef}
             className="absolute left-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 object-cover pointer-events-none"
-            src={LOCAL_VIDEO}
+            src="https://res.cloudinary.com/dnsdrqzi3/video/upload/v1774465869/mojo_video_czbwpy.mp4"
             autoPlay
             muted
             loop
