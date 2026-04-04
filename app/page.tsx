@@ -1,37 +1,19 @@
-'use client';
-
-import dynamic from "next/dynamic";
-
 import HeroVideo from "@/components/HeroVideo";
 import EditorialSection from "@/components/EditorialSection";
 import AboutIbizaSection from "@/components/AboutIbizaSection";
 import { SkiperGallery } from "@/components/Galerie";
+import { InstagramSection } from "@/components/InstagramSection";
+import { Skiper48Loader } from "@/components/Skiper48loader";
 
-const Skiper48 = dynamic(
-  () => import("@/components/HiIbizaStackCards").then(m => m.Skiper48),
-  { ssr: false, loading: () => <div className="h-40" /> }
-);
-
-const Skiper30 = dynamic(
-  () => import("@/components/Galerie").then(m => m.SkiperGallery),
-  { ssr: false, loading: () => <div className="h-40" /> }
-);
-
-const InstagramSection = dynamic(
-  () => import("@/components/InstagramSection").then(m => m.InstagramSection),
-  { ssr: false, loading: () => <div className="h-40" /> }
-);
 
 export default function Home() {
   return (
     <div className="mt-[-55px]">
       <HeroVideo />
       <EditorialSection />
-      <Skiper48 />
+      <Skiper48Loader />
       <AboutIbizaSection />
-      <main>
-        <SkiperGallery />
-      </main>
+      <SkiperGallery />
       <InstagramSection />
     </div>
   );
