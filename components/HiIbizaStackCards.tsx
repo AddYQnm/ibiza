@@ -106,18 +106,7 @@ const Carousel_002 = ({
         {showNavigation && (
           <>
             <button
-              className="
-                swiper-button-prev-custom
-                absolute left-2 top-1/2 z-30 flex h-11 w-11 -translate-y-1/2
-                items-center justify-center rounded-full border border-white/15
-                bg-black/35 text-white backdrop-blur-xl
-                shadow-[0_8px_30px_rgba(0,0,0,0.35)]
-                transition-all duration-300 ease-out
-                hover:scale-110 hover:border-white/25 hover:bg-black/55
-                active:scale-95
-                sm:left-3 sm:h-12 sm:w-12
-                md:left-4 md:h-14 md:w-14 md:opacity-0 md:group-hover:opacity-100
-              "
+              className="swiper-button-prev-custom absolute left-2 top-1/2 z-30 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/35 text-white backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.35)] transition-all duration-300 ease-out hover:scale-110 hover:border-white/25 hover:bg-black/55 active:scale-95 sm:left-3 sm:h-12 sm:w-12 md:left-4 md:h-14 md:w-14 md:opacity-0 md:group-hover:opacity-100"
               aria-label="Slide précédente"
               type="button"
             >
@@ -125,18 +114,7 @@ const Carousel_002 = ({
             </button>
 
             <button
-              className="
-                swiper-button-next-custom
-                absolute right-2 top-1/2 z-30 flex h-11 w-11 -translate-y-1/2
-                items-center justify-center rounded-full border border-white/15
-                bg-black/35 text-white backdrop-blur-xl
-                shadow-[0_8px_30px_rgba(0,0,0,0.35)]
-                transition-all duration-300 ease-out
-                hover:scale-110 hover:border-white/25 hover:bg-black/55
-                active:scale-95
-                sm:right-3 sm:h-12 sm:w-12
-                md:right-4 md:h-14 md:w-14 md:opacity-0 md:group-hover:opacity-100
-              "
+              className="swiper-button-next-custom absolute right-2 top-1/2 z-30 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/35 text-white backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.35)] transition-all duration-300 ease-out hover:scale-110 hover:border-white/25 hover:bg-black/55 active:scale-95 sm:right-3 sm:h-12 sm:w-12 md:right-4 md:h-14 md:w-14 md:opacity-0 md:group-hover:opacity-100"
               aria-label="Slide suivante"
               type="button"
             >
@@ -172,22 +150,15 @@ const Carousel_002 = ({
             rotate: true,
             slideShadows: false,
           }}
-          className="
-            mx-auto
-            w-full
-            max-w-[340px]
-            sm:max-w-[560px]
-            md:max-w-[900px]
-            lg:max-w-[1100px]
-            xl:max-w-[1280px]
-            overflow-visible
-          "
+          className="mx-auto w-full max-w-[340px] sm:max-w-[560px] md:max-w-[900px] lg:max-w-[1100px] xl:max-w-[1280px] overflow-visible"
           modules={[EffectCards, Autoplay, Pagination, Navigation]}
         >
           {images.map((image, index) => (
             <SwiperSlide key={image.src} className="overflow-hidden rounded-[28px] shadow-2xl">
-              <div className="relative aspect-video w-full overflow-hidden rounded-[28px] bg-black">
-                {/* Fond doux */}
+              {/* Container responsive */}
+              <div className="relative w-full md:aspect-video aspect-[4/5] overflow-hidden rounded-[28px] bg-black">
+                
+                {/* Background blur */}
                 <div className="absolute inset-0 scale-110 opacity-30 blur-2xl">
                   <Image
                     src={image.src}
@@ -205,7 +176,7 @@ const Carousel_002 = ({
                     src={image.src}
                     alt={image.alt}
                     fill
-                    className="object-contain"
+                    className="object-cover"
                     sizes="(min-width: 1280px) 1280px, (min-width: 1024px) 1100px, (min-width: 768px) 900px, 100vw"
                     priority={index === 0}
                     loading={index === 0 ? "eager" : "lazy"}
@@ -218,14 +189,14 @@ const Carousel_002 = ({
                     src={image.mobileSrc}
                     alt={image.alt}
                     fill
-                    className="object-contain"
+                    className="object-cover"
                     sizes="100vw"
                     priority={index === 0}
                     loading={index === 0 ? "eager" : "lazy"}
                   />
                 </div>
 
-                {/* léger overlay premium */}
+                {/* Overlay */}
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-white/5" />
               </div>
             </SwiperSlide>
@@ -243,32 +214,14 @@ const Carousel_002 = ({
       >
         <a
           href="/events"
-          className="
-            group relative inline-flex items-center gap-3
-            text-sm font-medium uppercase tracking-widest text-white/90
-            md:text-base
-          "
+          className="group relative inline-flex items-center gap-3 text-sm font-medium uppercase tracking-widest text-white/90 md:text-base"
         >
           En savoir plus
-          <span
-            className="
-              inline-block translate-x-0 opacity-70
-              transition-all duration-500 ease-out
-              group-hover:translate-x-2 group-hover:opacity-100
-            "
-          >
+          <span className="inline-block translate-x-0 opacity-70 transition-all duration-500 ease-out group-hover:translate-x-2 group-hover:opacity-100">
             →
           </span>
 
-          <span
-            className="
-              pointer-events-none absolute left-0 -bottom-2 h-[2px] w-full
-              origin-left scale-x-0
-              bg-gradient-to-r from-purple-400 via-fuchsia-400 to-indigo-400
-              transition-transform duration-500 ease-out
-              group-hover:scale-x-100
-            "
-          />
+          <span className="pointer-events-none absolute left-0 -bottom-2 h-[2px] w-full origin-left scale-x-0 bg-gradient-to-r from-purple-400 via-fuchsia-400 to-indigo-400 transition-transform duration-500 ease-out group-hover:scale-x-100" />
         </a>
       </motion.div>
     </motion.div>

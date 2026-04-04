@@ -1,121 +1,99 @@
-"use client";
-
-import React from "react";
-import { motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
 
+const IMAGES = [
+  "/images/speakeazy/1.png",
+  "/images/speakeazy/2.png",
+  "/images/speakeazy/3.png",
+];
+
 export default function AboutIbizaSection() {
-  const reduceMotion = useReducedMotion();
-
   return (
-    <section className="relative isolate w-full overflow-hidden py-32 px-6 md:px-16">
-      {/* BACKGROUND — CSS orbs defined in globals.css */}
-      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-        {!reduceMotion && (
-          <div className="absolute inset-0">
-            <div className="ibz-orb ibz-orb-1" />
-            <div className="ibz-orb ibz-orb-2" />
-            <div className="ibz-orb ibz-orb-3" />
-            <div className="ibz-orb ibz-orb-4" />
+    <>
+      <style>{`
+        @keyframes fade-up {
+          from { opacity: 0; transform: translateY(24px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .anim-left  { animation: fade-up 0.5s ease forwards; }
+        .anim-right { animation: fade-up 0.5s ease 0.1s forwards; opacity: 0; }
+        .anim-img   { opacity: 0; animation: fade-up 0.4s ease forwards; }
+      `}</style>
+
+      <section className="relative isolate w-full overflow-hidden py-32 px-6 md:px-16">
+
+        {/* Background orbs — static CSS, no JS */}
+        <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+          <div className="absolute -top-40 -left-40 h-[500px] w-[500px] rounded-full bg-purple-700/30 blur-[120px]" />
+          <div className="absolute top-20 right-0 h-[400px] w-[400px] rounded-full bg-fuchsia-700/20 blur-[100px]" />
+          <div className="absolute bottom-0 left-1/2 h-[300px] w-[600px] -translate-x-1/2 rounded-full bg-indigo-800/20 blur-[100px]" />
+          <div className="absolute inset-0 bg-black/60" />
+        </div>
+
+        <div className="relative z-10 mx-auto grid max-w-7xl grid-cols-1 gap-20 items-start lg:grid-cols-2">
+
+          {/* LEFT */}
+          <div className="anim-left">
+            <div className="mb-6 flex items-center gap-4">
+              <span className="h-[2px] w-12 bg-gradient-to-r from-purple-400 to-fuchsia-400" />
+              <span className="text-xs uppercase tracking-[0.3em] text-white/70">La privatisation</span>
+            </div>
+
+            <h2 className="text-5xl font-extrabold leading-tight text-white md:text-7xl">
+              SPEAK <br />
+              <span className="bg-gradient-to-r from-purple-300 via-fuchsia-400 to-indigo-300 bg-clip-text text-transparent">
+                EASY
+              </span>
+            </h2>
+
+            {/* Images grid */}
+            <div className="mt-14 grid grid-cols-3 gap-4">
+              {IMAGES.map((src, i) => (
+                <div
+                  key={src}
+                  className="anim-img relative h-44 w-full overflow-hidden rounded-2xl shadow-xl"
+                  style={{ animationDelay: `${i * 80}ms` }}
+                >
+                  <Image
+                    src={src}
+                    alt={`Ibiza Speakeasy ${i + 1}`}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 1024px) 33vw, 220px"
+                    priority={i === 0}
+                    loading={i === 0 ? "eager" : "lazy"}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
-        )}
-        <div className="absolute inset-0 bg-black/60" />
-      </div>
 
-      <div className="relative z-10 mx-auto grid max-w-7xl grid-cols-1 gap-20 items-start lg:grid-cols-2">
-        {/* LEFT */}
-        <motion.div
-          initial={reduceMotion ? false : { opacity: 0, y: 30 }}
-          whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.45, ease: "easeOut" }}
-        >
-          <div className="mb-6 flex items-center gap-4">
-            <span className="h-[2px] w-12 bg-gradient-to-r from-purple-400 to-fuchsia-400" />
-            <span className="text-xs uppercase tracking-[0.3em] text-white/70">La privatisation</span>
-          </div>
+          {/* RIGHT */}
+          <div className="anim-right text-base leading-relaxed text-white/85 md:text-xl">
+            <p className="mb-6">
+              <strong className="text-white">Le Speakeasy de l'Ibiza Club Rouen</strong> est un lieu
+              confidentiel, pensé comme une parenthèse hors du temps. Inspiré des bars clandestins, il
+              mélange élégance rétro et énergie nocturne contemporaine.
+            </p>
 
-          <h2 className="text-5xl font-extrabold leading-tight text-white md:text-7xl">
-            SPEAK <br />
-            <span className="bg-gradient-to-r from-purple-300 via-fuchsia-400 to-indigo-300 bg-clip-text text-transparent">
-              EASY
-            </span>
-          </h2>
+            <p>
+              Un éclairage doux, une ambiance feutrée et une atmosphère exclusive font du Speakeasy
+              l'espace idéal pour des soirées privées, des moments privilégiés ou une privatisation sur
+              mesure.
+            </p>
 
-          {/* Images grid */}
-          <motion.div
-            className="mt-14 grid grid-cols-3 gap-4"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-            variants={
-              reduceMotion
-                ? undefined
-                : { visible: { transition: { staggerChildren: 0.08 } } }
-            }
-          >
-            {[
-              "/images/speakeazy/1.png",
-              "/images/speakeazy/2.png",
-              "/images/speakeazy/3.png",
-            ].map((src, i) => (
-              <motion.div
-                key={src}
-                className="relative h-44 w-full overflow-hidden rounded-2xl shadow-xl"
-                variants={
-                  reduceMotion
-                    ? undefined
-                    : {
-                        hidden: { opacity: 0, y: 14 },
-                        visible: { opacity: 1, y: 0 },
-                      }
-                }
-                transition={{ duration: 0.4, ease: "easeOut" }}
+            <div className="mt-10">
+              <a
+                href="/speakeazy"
+                className="group relative inline-block text-sm font-medium tracking-wide text-white/90 md:text-base"
               >
-                <Image
-                  src={src}
-                  alt={`Ibiza Speakeasy ${i + 1}`}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 1024px) 33vw, 220px"
-                  priority={i === 0}
-                />
-              </motion.div>
-            ))}
-          </motion.div>
-        </motion.div>
-
-        {/* RIGHT */}
-        <motion.div
-          initial={reduceMotion ? false : { opacity: 0, y: 30 }}
-          whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.45, delay: 0.05, ease: "easeOut" }}
-          className="text-base leading-relaxed text-white/85 md:text-xl"
-        >
-          <p className="mb-6">
-            <strong className="text-white">Le Speakeasy de l'Ibiza Club Rouen</strong> est un lieu
-            confidentiel, pensé comme une parenthèse hors du temps. Inspiré des bars clandestins, il
-            mélange élégance rétro et énergie nocturne contemporaine.
-          </p>
-
-          <p>
-            Un éclairage doux, une ambiance feutrée et une atmosphère exclusive font du Speakeasy
-            l'espace idéal pour des soirées privées, des moments privilégiés ou une privatisation sur
-            mesure.
-          </p>
-
-          <div className="mt-10">
-            <a
-              href="/speakeazy"
-              className="group relative inline-block text-sm font-medium tracking-wide text-white/90 md:text-base"
-            >
-              En savoir plus
-              <span className="pointer-events-none absolute left-0 -bottom-2 h-[2px] w-full origin-left scale-x-0 bg-gradient-to-r from-purple-400 via-fuchsia-400 to-indigo-400 transition-transform duration-500 ease-out group-hover:scale-x-100" />
-            </a>
+                En savoir plus
+                <span className="pointer-events-none absolute left-0 -bottom-2 h-[2px] w-full origin-left scale-x-0 bg-gradient-to-r from-purple-400 via-fuchsia-400 to-indigo-400 transition-transform duration-500 ease-out group-hover:scale-x-100" />
+              </a>
+            </div>
           </div>
-        </motion.div>
-      </div>
-    </section>
+
+        </div>
+      </section>
+    </>
   );
 }
