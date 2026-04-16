@@ -1,4 +1,3 @@
-// app/layout.tsx
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -69,17 +68,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fr">
+    // ✅ className="dark" pour forcer le thème sombre partout
+    <html lang="fr" className="dark">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        {/* Fond animé global — z-0, pointer-events-none */}
         <BackgroundGlobal />
 
-        {/* NAVBAR fixe */}
+        {/* Navbar fixe — z-50 */}
         <header className="fixed top-0 left-0 w-full z-50">
           <NavbarDemo />
         </header>
 
-        {/* CONTENU — un seul wrapper, pas de <main> ici */}
-        <div className="pt-[55px]">
+        {/* Contenu principal — z-10 relatif pour passer au-dessus du fond */}
+        <div className="relative z-10 pt-[55px]">
           {children}
         </div>
 

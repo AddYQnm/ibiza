@@ -177,7 +177,7 @@ video {
   }
 }
 
-/* ─── Hero animations (CSS-only, pas de Framer pour les blobs) ─ */
+/* ─── Hero animations ───────────────────────────────────────── */
 @keyframes spotlight {
   0%   { opacity: 0; transform: translate(-72%, -62%) scale(0.5); }
   100% { opacity: 1; transform: translate(-50%, -40%) scale(1);   }
@@ -189,11 +189,11 @@ video {
 }
 
 @keyframes heroFloatXY {
-  0%, 100% { transform: translate(0, 0)       scale(1);    }
+  0%, 100% { transform: translate(0, 0)        scale(1);    }
   50%       { transform: translate(18px, -12px) scale(1.04); }
 }
 
-/* Blobs orbs pour AboutIbizaSection — CSS pur, zero Framer */
+/* Blobs orbs pour AboutIbizaSection — CSS pur */
 .ibz-orb {
   position: absolute;
   border-radius: 9999px;
@@ -251,10 +251,17 @@ video {
   animation: pulse-slow 8s ease-in-out infinite;
 }
 
+/* ─── Mobile : désactive UNIQUEMENT les blobs, pas tout le site ─ */
 @media (max-width: 768px) {
-  * {
+  .animate-first,
+  .animate-second,
+  .animate-third,
+  .animate-fourth,
+  .animate-fifth,
+  .ibz-orb-1,
+  .ibz-orb-2,
+  .ibz-orb-3,
+  .ibz-orb-4 {
     animation: none !important;
-    transition: none !important;
   }
 }
-
