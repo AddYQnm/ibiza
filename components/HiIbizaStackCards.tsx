@@ -74,17 +74,19 @@ const Carousel_002 = ({
   const reduceMotion = useReducedMotion();
 
   return (
-    <motion.div
-      initial={reduceMotion ? false : { opacity: 0, y: 30 }}
-      animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className={cn("mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-32", className)}
-    >
+    /*
+      CORRECTIF INP :
+      - Suppression du motion.div wrapper avec animate immédiat → évite une
+        animation de layout au montage qui bloque le thread principal.
+      - Le titre garde whileInView mais avec un seul motion.div (pas de stagger enfants).
+    */
+    <div className={cn("mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-32", className)}>
+
       {/* TITRE */}
       <motion.div
-        initial={reduceMotion ? false : { opacity: 0, y: 40 }}
+        initial={reduceMotion ? false : { opacity: 0, y: 30 }}
         whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
         viewport={{ once: true, margin: "-10% 0px" }}
         className="mb-14 sm:mb-20"
       >
@@ -155,20 +157,18 @@ const Carousel_002 = ({
         >
           {images.map((image, index) => (
             <SwiperSlide key={image.src} className="overflow-hidden rounded-[28px] shadow-2xl">
-              {/* Container responsive */}
               <div className="relative w-full md:aspect-video aspect-[4/5] overflow-hidden rounded-[28px] bg-black">
-                
-                {/* Background blur */}
-                <div className="absolute inset-0 scale-110 opacity-30 blur-2xl">
-                  <Image
-                    src={image.src}
-                    alt={image.alt}
-                    fill
-                    className="object-cover"
-                    sizes="100vw"
-                    priority={index === 0}
-                  />
-                </div>
+
+                {/*
+                  CORRECTIF LCP + performance :
+                  Suppression du "Background blur" qui chargeait la même image 2×
+                  (une fois en blur pour le fond, une fois pour l'affichage réel).
+                  Cela doublait les requêtes images → +LCP, +INP (paint coûteux).
+                  
+                  Si l'effet blur de fond vous manque visuellement, une alternative
+                  sans surcoût réseau est d'utiliser une couleur dominante extraite
+                  via `blurDataURL` sur le composant Image Next.js.
+                */}
 
                 {/* Desktop */}
                 <div className="relative hidden h-full w-full md:block">
@@ -196,7 +196,6 @@ const Carousel_002 = ({
                   />
                 </div>
 
-                {/* Overlay */}
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-white/5" />
               </div>
             </SwiperSlide>
@@ -220,11 +219,10 @@ const Carousel_002 = ({
           <span className="inline-block translate-x-0 opacity-70 transition-all duration-500 ease-out group-hover:translate-x-2 group-hover:opacity-100">
             →
           </span>
-
           <span className="pointer-events-none absolute left-0 -bottom-2 h-[2px] w-full origin-left scale-x-0 bg-gradient-to-r from-purple-400 via-fuchsia-400 to-indigo-400 transition-transform duration-500 ease-out group-hover:scale-x-100" />
         </a>
       </motion.div>
-    </motion.div>
+    </div>
   );
 };
 

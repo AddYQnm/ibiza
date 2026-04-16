@@ -63,8 +63,20 @@ export function InstagramSection() {
                 fill
                 sizes="(max-width: 768px) 50vw, 25vw"
                 className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-                priority={i < 2}
-                loading={i < 2 ? "eager" : "lazy"}
+                /*
+                  CORRECTIF LCP / réseau :
+                  Avant : priority={i < 2} ET loading={i < 2 ? "eager" : "lazy"}
+                  → les 2 premières images avaient PRIORITY + EAGER (redondant mais ok)
+                  → MAIS quality=75 était déjà raisonnable.
+
+                  Le vrai problème : cette section est généralement en bas de page,
+                  donc AUCUNE image ne devrait être priority=true ici.
+                  On supprime priority et on laisse tout en lazy.
+                  
+                  Si cette section remonte en haut de page un jour, remettre
+                  priority={i === 0} uniquement.
+                */
+                loading="lazy"
                 quality={75}
               />
               <div className="absolute inset-0 bg-black/30 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
