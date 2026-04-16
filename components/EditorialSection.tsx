@@ -14,13 +14,13 @@ import { motion, useReducedMotion } from "framer-motion";
 const sectionVariants = {
   hidden: {},
   show: {
-    transition: { staggerChildren: 0.08, ease: "easeOut" },
+    transition: { staggerChildren: 0.08 },
   },
 };
 
 const fadeUp = {
   hidden: { opacity: 0, y: 14 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: "easeOut" } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.45 } },
 };
 
 export default function EditorialSection() {
