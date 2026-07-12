@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 
 const IMAGES = [
   "/images/photo/A22A6636.jpeg",
@@ -20,58 +20,50 @@ export function SkiperGallery() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  // Détecte la photo visible via IntersectionObserver
-  useEffect(() => {
+  const handleScroll = () => {
     const container = scrollRef.current;
     if (!container) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const index = Number((entry.target as HTMLElement).dataset.index);
-            setActiveIndex(index);
-          }
-        });
-      },
-      { root: container, threshold: 0.6 }
-    );
+    const slideWidth = container.firstElementChild?.clientWidth ?? 1;
+    const gap = 8; // gap-2 = 8px
 
-    const slides = container.querySelectorAll("[data-index]");
-    slides.forEach((slide) => observer.observe(slide));
-    return () => observer.disconnect();
-  }, []);
+    const index = Math.round(container.scrollLeft / (slideWidth + gap));
+
+    if (index !== activeIndex) {
+      setActiveIndex(index);
+    }
+  };
 
   const scrollTo = (index: number) => {
     const container = scrollRef.current;
     if (!container) return;
-    const slide = container.querySelector<HTMLElement>(`[data-index="${index}"]`);
-    slide?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+
+    const slide = container.children[index] as HTMLElement;
+
+    container.scrollTo({
+      left: slide.offsetLeft - 16,
+      behavior: "smooth",
+    });
   };
 
   return (
     <section className="w-full py-6">
-
-      {/* ── Mobile : carousel plein-largeur avec snap ── */}
+      {/* MOBILE */}
       <div className="block md:hidden relative">
-
-        {/* Compteur */}
-        <div className="absolute top-3 right-3 z-10 bg-black/60 backdrop-blur-sm text-white/90 text-xs font-medium px-2.5 py-1 rounded-full">
+        <div className="absolute top-3 right-3 z-10 bg-black/60 backdrop-blur-sm text-white text-xs font-medium px-2.5 py-1 rounded-full">
           {activeIndex + 1} / {IMAGES.length}
         </div>
 
-        {/* Scroll container */}
         <div
           ref={scrollRef}
-          className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide gap-2 px-4"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          onScroll={handleScroll}
+          className="flex overflow-x-auto snap-x snap-mandatory gap-2 px-4 scroll-smooth scrollbar-hide"
         >
           {IMAGES.map((src, i) => (
             <div
-              key={`${src}-${i}`}
-              data-index={i}
-              className="flex-none snap-center w-[85vw] rounded-2xl overflow-hidden bg-zinc-900 relative"
-              style={{ aspectRatio: "3/4" }}
+              key={src}
+              className="relative flex-none w-[85vw] snap-center overflow-hidden rounded-2xl bg-zinc-900"
+              style={{ aspectRatio: "3 / 4" }}
             >
               <Image
                 src={src}
@@ -79,55 +71,51 @@ export function SkiperGallery() {
                 fill
                 className="object-cover"
                 sizes="85vw"
-                quality={75}
-                priority={i < 2}
-                loading={i < 2 ? "eager" : "lazy"}
+                quality={55}
+                priority={i === 0}
               />
             </div>
           ))}
         </div>
 
-        {/* Dots de navigation */}
-        <div className="flex justify-center gap-1.5 mt-3 px-4">
+        <div className="mt-3 flex justify-center gap-2">
           {IMAGES.map((_, i) => (
             <button
               key={i}
               onClick={() => scrollTo(i)}
-              aria-label={`Aller à la photo ${i + 1}`}
-              className={`rounded-full transition-all duration-300 ${
-                i === activeIndex
+              aria-label={`Photo ${i + 1}`}
+              className={`transition-all duration-300 rounded-full ${
+                activeIndex === i
                   ? "w-5 h-1.5 bg-white"
-                  : "w-1.5 h-1.5 bg-white/30"
+                  : "w-1.5 h-1.5 bg-white/40"
               }`}
             />
           ))}
         </div>
       </div>
 
-      {/* ── Desktop : masonry classique ── */}
+      {/* DESKTOP */}
       <div className="hidden md:block px-4">
-        <div className="columns-3 lg:columns-4 gap-3 space-y-3">
+        <div className="grid grid-cols-3 lg:grid-cols-4 gap-3">
           {IMAGES.map((src, i) => (
             <div
-              key={`${src}-${i}`}
-              className="relative break-inside-avoid overflow-hidden rounded-xl bg-zinc-900"
+              key={src}
+              className="overflow-hidden rounded-xl bg-zinc-900"
             >
               <Image
                 src={src}
                 alt={`Ibiza Club Rouen - photo ${i + 1}`}
                 width={600}
                 height={900}
-                className="w-full h-auto block hover:scale-105 transition-transform duration-500"
-                sizes="(max-width: 1024px) 33vw, 25vw"
-                quality={70}
-                priority={i < 2}
-                loading={i < 2 ? "eager" : "lazy"}
+                className="block w-full h-auto"
+                sizes="(max-width:1024px) 33vw, 25vw"
+                quality={55}
+                priority={i === 0}
               />
             </div>
           ))}
         </div>
       </div>
-
     </section>
   );
 }

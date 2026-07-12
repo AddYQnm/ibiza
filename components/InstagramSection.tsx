@@ -7,8 +7,8 @@ const POSTS = [
   "/images/instagram/4.png",
   "/images/instagram/5.png",
   "/images/instagram/6.jpeg",
-  "/images/photo/A22A6829.jpeg",
-  "/images/photo/A22A6919.jpeg",
+  "/images/instagram/7.jpeg",
+  "/images/instagram/8.jpeg",
 ];
 
 const IG_URL = "https://www.instagram.com/ibizaclubrouen/";
@@ -55,7 +55,7 @@ export function InstagramSection() {
               href={IG_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="group relative aspect-square overflow-hidden rounded-xl"
+              className="group relative aspect-[3/4] overflow-hidden rounded-xl"
             >
               <Image
                 src={src}

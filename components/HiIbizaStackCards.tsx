@@ -20,9 +20,9 @@ const Skiper48 = () => {
   const images = useMemo(
     () => [
       { src: "/images/ibiza/b.png", mobileSrc: "/images/mobile/2.png", alt: "Ibiza event" },
-      { src: "/images/ibiza/b1.png", mobileSrc: "/images/mobile/17.04_Insta.png", alt: "Ibiza event" },
+      { src: "/images/ibiza/b1.png", mobileSrc: "/images/mobile/5.png", alt: "Ibiza event" },
       { src: "/images/ibiza/b2.png", mobileSrc: "/images/mobile/POST (7).png", alt: "Ibiza event" },
-      { src: "/images/ibiza/b3.png", mobileSrc: "/images/mobile/11.04_Insta.png", alt: "Ibiza event" },
+      { src: "/images/ibiza/b3.png", mobileSrc: "/images/mobile/6.png", alt: "Ibiza event" },
       { src: "/images/ibiza/b4.png", mobileSrc: "/images/mobile/3.png", alt: "Ibiza event" },
       { src: "/images/ibiza/b5.png", mobileSrc: "/images/mobile/4.png", alt: "Ibiza event" },
     ],
