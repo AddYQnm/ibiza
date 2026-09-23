@@ -3,9 +3,9 @@ import Image from "next/image";
 const POSTS = [
   "/images/instagram/1.jpeg",
   "/images/instagram/2.jpeg",
-  "/images/instagram/3.png",
-  "/images/instagram/4.png",
-  "/images/instagram/5.png",
+  "/images/instagram/3.jpeg",
+  "/images/instagram/4.jpeg",
+  "/images/instagram/5.jpeg",
   "/images/instagram/6.jpeg",
   "/images/instagram/7.jpeg",
   "/images/instagram/8.jpeg",
