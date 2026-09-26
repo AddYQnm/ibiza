@@ -87,7 +87,7 @@ export default function Footer() {
         className="flex items-center gap-2 hover:text-white transition"
       >
         <FaEnvelope className="text-fuchsia-400" />
-        contact.ibizaclub@gmail.com
+        contact@ibizaclub.fr
       </a>
     </li>
 
