@@ -1,9 +1,8 @@
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Footer from "@/components/Footer";
-import { NavbarDemo } from "@/components/NavbarDemo";
-import { BackgroundGlobal } from "@/components/BackgroundGlobal";
+import { SiteShell } from "@/components/SiteShell";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -68,23 +67,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    // ✅ className="dark" pour forcer le thème sombre partout
     <html lang="fr" className="dark">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {/* Fond animé global — z-0, pointer-events-none */}
-        <BackgroundGlobal />
-
-        {/* Navbar fixe — z-50 */}
-        <header className="fixed top-0 left-0 w-full z-50">
-          <NavbarDemo />
-        </header>
-
-        {/* Contenu principal — z-10 relatif pour passer au-dessus du fond */}
-        <div className="relative z-10 pt-[55px]">
-          {children}
-        </div>
-
-        <Footer />
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <SiteShell>{children}</SiteShell>
       </body>
     </html>
   );

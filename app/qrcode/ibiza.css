@@ -1,0 +1,790 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Sans:wght@400;500;600;700;800;900&display=swap');
+
+.ibiza-editorial {
+  --red: #9b5cff;
+  --black: #09070e;
+  --white: #f5f0fc;
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  overflow: hidden;
+  background: var(--black);
+  color: var(--white);
+  font-family: "DM Sans", sans-serif;
+}
+
+.ibiza-editorial * {
+  box-sizing: border-box;
+}
+
+.ibiza-editorial a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.ibiza-editorial button {
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.ibiza-pattern {
+  position: absolute;
+  inset: -30%;
+  z-index: -1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  gap: 28px;
+  overflow: hidden;
+  transform: rotate(-20deg);
+  pointer-events: none;
+}
+
+.ibiza-pattern span {
+  width: max-content;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255,255,255,.12);
+  font-family: "Archivo Black", sans-serif;
+  font-size: clamp(40px, 7vw, 100px);
+  font-weight: 900;
+  white-space: nowrap;
+  letter-spacing: -.07em;
+}
+
+.ibiza-brand {
+  position: absolute;
+  top: 30px;
+  left: 3.5%;
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.brand-symbol {
+  font-family: "Archivo Black", sans-serif;
+  font-size: 46px;
+  line-height: .8;
+  letter-spacing: -.1em;
+}
+
+.brand-symbol::first-letter {
+  color: var(--red);
+}
+
+.brand-name {
+  margin-top: 8px;
+  font-family: "Archivo Black", sans-serif;
+  font-size: 23px;
+  letter-spacing: -.08em;
+}
+
+.brand-location {
+  margin-top: 5px;
+  font-size: 8px;
+  letter-spacing: .19em;
+  color: #aaa;
+}
+
+.ibiza-sidebar {
+  position: absolute;
+  z-index: 5;
+  top: 190px;
+  bottom: 75px;
+  left: 3.5%;
+  display: flex;
+  width: 210px;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.sidebar-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 25px;
+}
+
+.sidebar-index,
+.sidebar-footnote {
+  font-size: 8px;
+  letter-spacing: .2em;
+  color: #999;
+}
+
+.sidebar-rule {
+  width: 30px;
+  height: 1px;
+  background: var(--red);
+}
+
+.ibiza-navigation {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ibiza-navigation a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 3px 0;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: -.025em;
+  transition: color .2s ease;
+}
+
+.ibiza-navigation a:hover,
+.ibiza-navigation .nav-active {
+  color: var(--red);
+}
+
+.nav-number {
+  font-size: 8px;
+  font-weight: 500;
+  color: #777;
+  opacity: 0;
+}
+
+.ibiza-navigation a:hover .nav-number {
+  opacity: 1;
+}
+
+.ibiza-reserve {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 25px;
+  padding: 12px;
+  border: 1px solid rgba(255,255,255,.75);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .06em;
+  transition: background .2s, color .2s;
+}
+
+.ibiza-reserve:hover {
+  background: var(--white);
+  color: var(--black);
+}
+
+.sidebar-address {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.sidebar-address > div > span {
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .15em;
+}
+
+.sidebar-address p {
+  margin-top: 7px;
+  color: #aaa;
+  font-size: 10px;
+}
+
+.sidebar-footnote {
+  margin-top: auto;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
+
+.ibiza-stage {
+  position: relative;
+  width: calc(100% - 30%);
+  height: min(76vw, 740px);
+  min-height: 540px;
+  margin-left: 27.5%;
+  overflow: hidden;
+  border-right: 1px solid #ffffff25;
+  border-bottom: 1px solid #ffffff25;
+  background: #181818;
+}
+
+.stage-image {
+  position: absolute;
+  inset: 0;
+  background-position: center;
+  background-size: cover;
+  animation: ibiza-enter .7s ease both;
+}
+
+.stage-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #0005, transparent 25%, transparent 58%, #0009),
+              linear-gradient(90deg, #0003, transparent 60%);
+  pointer-events: none;
+}
+
+.stage-topline {
+  position: absolute;
+  top: 25px;
+  left: 25px;
+  right: 25px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .2em;
+}
+
+.stage-vertical {
+  position: absolute;
+  top: 30%;
+  right: 18px;
+  writing-mode: vertical-rl;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .25em;
+}
+
+.stage-poster {
+  position: absolute;
+  right: 8%;
+  bottom: 17%;
+  width: min(470px, 66%);
+  padding: 24px 28px 22px;
+  background:
+    repeating-linear-gradient(165deg, transparent 0 8px, #ffffff03 9px 10px),
+    #090909;
+  border: 1px solid #ffffff12;
+  box-shadow: 0 18px 35px #0008;
+  transform: rotate(-2deg);
+  animation: poster-arrive .6s ease both;
+}
+
+.poster-top,
+.poster-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: .14em;
+}
+
+.poster-top {
+  padding-bottom: 14px;
+  border-bottom: 1px solid #ffffff30;
+}
+
+.poster-bottom {
+  padding-top: 14px;
+  border-top: 1px solid #ffffff30;
+  color: #aaa;
+}
+
+.poster-copy {
+  position: relative;
+  padding: 20px 0;
+}
+
+.poster-small {
+  display: block;
+  margin-bottom: 3px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .05em;
+}
+
+.poster-copy h1 {
+  max-width: 100%;
+  margin: 0;
+  color: var(--red);
+  font-family: "Archivo Black", sans-serif;
+  font-size: clamp(32px, 5vw, 66px);
+  line-height: .83;
+  letter-spacing: -.075em;
+  overflow-wrap: anywhere;
+}
+
+.poster-stamp {
+  position: absolute;
+  right: 25px;
+  top: 48%;
+  color: #ffffff12;
+  font-family: "Archivo Black", sans-serif;
+  font-size: 65px;
+  transform: translateY(-50%) rotate(9deg);
+  pointer-events: none;
+}
+
+.stage-controls {
+  position: absolute;
+  right: 7%;
+  bottom: 5%;
+  left: 7%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.stage-dots,
+.stage-arrows {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stage-dots button {
+  width: 10px;
+  height: 10px;
+  padding: 0;
+  border: 1px solid white;
+  border-radius: 50%;
+  background: transparent;
+  transition: background .2s, transform .2s;
+}
+
+.stage-dots button.active {
+  background: var(--red);
+  border-color: var(--red);
+  transform: scale(1.15);
+}
+
+.stage-arrows button {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 1px solid #ffffff80;
+  background: #0005;
+  transition: background .2s, color .2s;
+}
+
+.stage-arrows button:hover {
+  background: var(--white);
+  color: var(--black);
+}
+
+.stage-arrows svg {
+  width: 18px;
+}
+
+.stage-bottom-label {
+  position: absolute;
+  bottom: 23px;
+  left: 25px;
+  display: flex;
+  gap: 15px;
+  font-size: 8px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.stage-bottom-label span:first-child {
+  color: var(--red);
+  font-weight: 900;
+}
+
+.ibiza-socials {
+  position: absolute;
+  z-index: 5;
+  top: 36%;
+  right: 3.2%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 26px;
+}
+
+.social-label {
+  color: #888;
+  font-size: 7px;
+  letter-spacing: .2em;
+  writing-mode: vertical-rl;
+}
+
+.ibiza-socials a {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  writing-mode: vertical-rl;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .12em;
+  transition: color .2s;
+}
+
+.ibiza-socials a:hover {
+  color: var(--red);
+}
+
+.social-ticket {
+  font-size: 20px;
+}
+
+.ibiza-marquee {
+  position: relative;
+  z-index: -1;
+  width: 100%;
+  margin-top: -10px;
+  overflow: hidden;
+  white-space: nowrap;
+  line-height: .8;
+  pointer-events: none;
+}
+
+.ibiza-marquee span {
+  display: inline-block;
+  color: var(--white);
+  font-family: "Archivo Black", sans-serif;
+  font-size: clamp(65px, 11vw, 155px);
+  letter-spacing: -.1em;
+  animation: ibiza-marquee 22s linear infinite;
+}
+
+.ibiza-mobile-menu,
+.ibiza-mobile-navigation,
+.ibiza-mobile-actions {
+  display: none;
+}
+
+@keyframes ibiza-enter {
+  from { opacity: .4; transform: scale(1.025); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes poster-arrive {
+  from { opacity: 0; transform: translateY(12px) rotate(-2deg); }
+  to { opacity: 1; transform: translateY(0) rotate(-2deg); }
+}
+
+@keyframes ibiza-marquee {
+  to { transform: translateX(-30%); }
+}
+
+@media (min-width: 1500px) {
+  .ibiza-stage {
+    height: 760px;
+  }
+}
+
+@media (max-width: 1000px) {
+  .ibiza-sidebar {
+    width: 170px;
+  }
+
+  .ibiza-stage {
+    width: calc(100% - 29%);
+    margin-left: 25%;
+    min-height: 500px;
+  }
+
+  .stage-poster {
+    right: 6%;
+    width: 75%;
+  }
+
+  .ibiza-socials {
+    right: 2%;
+  }
+
+  .ibiza-socials a {
+    font-size: 7px;
+  }
+}
+
+@media (max-width: 650px) {
+  .ibiza-editorial {
+    min-height: 100svh;
+    padding-bottom: 65px;
+  }
+
+  .ibiza-pattern {
+    inset: -15%;
+    gap: 50px;
+    opacity: .65;
+  }
+
+  .ibiza-pattern span {
+    font-size: 48px;
+  }
+
+  .ibiza-brand {
+    position: absolute;
+    top: 22px;
+    left: 20px;
+  }
+
+  .brand-symbol {
+    font-size: 32px;
+  }
+
+  .brand-name {
+    font-size: 17px;
+    margin-top: 6px;
+  }
+
+  .brand-location {
+    font-size: 7px;
+  }
+
+  .ibiza-sidebar,
+  .ibiza-socials {
+    display: none;
+  }
+
+  .ibiza-mobile-menu {
+    position: absolute;
+    top: 24px;
+    right: 20px;
+    z-index: 22;
+    display: grid;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    border: 1px solid #ffffff55;
+    background: #090909c9;
+  }
+
+  .ibiza-mobile-navigation {
+    position: absolute;
+    inset: 0 0 auto;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    padding: 100px 25px 30px;
+    background: #090909;
+    box-shadow: 0 20px 45px #0008;
+  }
+
+  .mobile-menu-title {
+    margin-bottom: 20px;
+    color: var(--red);
+    font-family: "Archivo Black", sans-serif;
+    font-size: 20px;
+  }
+
+  .ibiza-mobile-navigation a {
+    display: grid;
+    grid-template-columns: 30px 1fr 20px;
+    align-items: center;
+    gap: 10px;
+    padding: 17px 0;
+    border-bottom: 1px solid #ffffff20;
+    font-size: 12px;
+    font-weight: 900;
+  }
+
+  .mobile-link-index {
+    color: var(--red);
+    font-size: 9px;
+  }
+
+  .ibiza-stage {
+    width: auto;
+    height: 74svh;
+    min-height: 570px;
+    max-height: 790px;
+    margin: 0 12px;
+    margin-top: 125px;
+    border: 1px solid #ffffff25;
+  }
+
+  .stage-image {
+    background-position: center;
+  }
+
+  .stage-overlay {
+    background: linear-gradient(180deg, #0005, transparent 35%, #0008);
+  }
+
+  .stage-topline {
+    top: 15px;
+    left: 14px;
+    right: 14px;
+    font-size: 6px;
+    letter-spacing: .12em;
+  }
+
+  .stage-vertical {
+    right: 8px;
+    font-size: 6px;
+  }
+
+  .stage-poster {
+    right: 5%;
+    bottom: 19%;
+    width: 88%;
+    padding: 17px 15px 15px;
+  }
+
+  .poster-top,
+  .poster-bottom {
+    font-size: 6px;
+  }
+
+  .poster-copy {
+    padding: 18px 0;
+  }
+
+  .poster-small {
+    font-size: 9px;
+  }
+
+  .poster-copy h1 {
+    font-size: clamp(34px, 10vw, 56px);
+  }
+
+  .poster-stamp {
+    right: 10px;
+    font-size: 45px;
+  }
+
+  .stage-controls {
+    right: 5%;
+    bottom: 5%;
+    left: 5%;
+  }
+
+  .stage-dots,
+  .stage-arrows {
+    gap: 8px;
+  }
+
+  .stage-arrows button {
+    width: 32px;
+    height: 32px;
+  }
+
+  .stage-dots button {
+    width: 8px;
+    height: 8px;
+  }
+
+  .stage-bottom-label {
+    bottom: 14px;
+    left: 14px;
+    font-size: 6px;
+    gap: 9px;
+  }
+
+  .ibiza-marquee {
+    margin-top: 2px;
+  }
+
+  .ibiza-marquee span {
+    font-size: 67px;
+  }
+
+  .ibiza-mobile-actions {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 25;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 8px;
+    background: #090909;
+    border-top: 1px solid #ffffff25;
+  }
+
+  .ibiza-mobile-actions a {
+    display: flex;
+    min-height: 45px;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: .1em;
+  }
+
+  .ibiza-mobile-actions a:last-child {
+    background: var(--red);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ibiza-editorial *,
+  .ibiza-editorial *::before,
+  .ibiza-editorial *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+
+/* Flèches de navigation — sans encadrement */
+
+.stage-arrows {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.stage-arrows button {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  padding: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #a66aff;
+  transition:
+    color 180ms ease,
+    transform 180ms ease;
+}
+
+.stage-arrows button:hover {
+  background: transparent;
+  color: #d0adff;
+  transform: scale(1.15);
+}
+
+.stage-arrows button svg {
+  width: 30px;
+  height: 30px;
+  stroke-width: 2.5;
+}
+
+.stage-poster {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.poster-bottom span:last-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #b98aff;
+}
+
+@media (max-width: 650px) {
+  .stage-arrows {
+    gap: 12px;
+  }
+
+  .stage-arrows button {
+    width: 42px;
+    height: 42px;
+  }
+
+  .stage-arrows button svg {
+    width: 28px;
+    height: 28px;
+  }
+}
