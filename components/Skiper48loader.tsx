@@ -1,12 +1,8 @@
-"use client";
-
-import dynamic from "next/dynamic";
-
-const Skiper48 = dynamic(
-  () => import("@/components/HiIbizaStackCards").then(m => m.Skiper48),
-  { ssr: false, loading: () => <div className="h-40" /> }
-);
+import { getEventImages } from "@/lib/events";
+import { Skiper48 } from "@/components/HiIbizaStackCards";
 
 export function Skiper48Loader() {
-  return <Skiper48 />;
+  const images = getEventImages();
+
+  return <Skiper48 images={images} />;
 }
